@@ -1,0 +1,313 @@
+body {
+	font-family: arial, helvetica, verdana, sans-serif;
+	font-size: 12pt;
+	line-height: 16pt;
+	color: #eeeeee;
+	background-color: #000000;
+}
+h1 h2 h3 h4 h5 h6 h7 {
+	font-family: asrafel;
+}
+h2 {
+	font-family: asrafel;
+	color: #eeeeee;
+	font-size: 20pt;
+	font-weight: bold;
+	text-decoration: underline;
+	margin-bottom: 12pt;
+}
+h4 {
+	color: #eeeeee;
+	font-size: 16pt;
+	font-weight: bold;
+	text-decoration: underline;
+	margin-bottom:6pt;
+}
+h6 {
+	font-size: 13pt;
+	font-weight: bold;
+	text-decoration: underline;
+	margin-top: 4pt;
+	margin-bottom: 2pt;
+	padding-top: 2pt;
+	padding-bottom: 1pt;
+}
+ul {
+	margin: 0 0 0 0;
+}
+li {
+	margin: 5 0 5 50;
+}
+p {
+	margin-top: 0pt;
+	margin-bottom: 10pt;
+}
+table {
+	padding: 0pt;
+	margin: 0pt;
+	border: none;
+}
+tr {
+}
+td {
+	padding: 5pt;
+	font-size: 12pt;
+	color: #eeeeee;
+	vertical-align: top;
+}
+th {
+	font-size: 12pt;
+	text-align: center;
+}
+input, textarea {
+	font-size: 12pt;
+	padding: 0pt 0pt 0pt 5pt;
+	border-style: solid;
+	border-width: 2pt;
+	border-color: #999999;
+	border-radius: 15pt;
+	margin: 1pt 0pt 1pt 0pt;
+}
+input[type="button"] {
+	width: 19pt;
+	font-size: 13pt;
+	font-weight: bold;
+	padding: 0pt 4pt 0pt 5px;
+	background-color: #ff9999;
+	border-style: solid;
+	border-width: 2pt;
+	border-color: #ff6666;
+	border-radius: 15pt;
+	margin: 1px;
+}
+input[type="submit"] {
+	font-size: 13pt;
+	font-weight: bold;
+	padding: 0pt 4pt 0pt 5px;
+	background-color: #ff9999;
+	border-style: solid;
+	border-width: 2pt;
+	border-color: #ff6666;
+	border-radius: 15pt;
+	margin: 1px;
+}
+select {
+	font-size: 12pt;
+	padding: 0pt 2pt;
+	border-style: solid;
+	border-width: 2pt;
+	border-color: #999999;
+	border-radius: 15pt;
+	margin: 1pt 0pt 1pt 1pt;
+	width: 100pt;
+}
+textarea {
+	max-width: 475px;
+}
+sup {
+	font-weight: bold;
+	line-height: 0px;
+}
+.menuLink {
+	font-weight: bold;
+}
+.orgTable {
+	margin: 0pt;
+	border-collapse: collapse;
+	padding: 0pt;
+	background-color: #000000;
+}
+.orgTR {
+	background-color: #000000;
+	margin: 0pt;
+	border: none;
+	padding: 0pt;
+}
+.orgTD {
+	margin: 0pt;
+	border: none;
+	padding: 0pt;
+}
+.listTD {
+	background-color: #330000;
+	vertical-align: middle;
+}
+.orgMember {
+	width: 30pt;
+	margin: 0pt 0pt;
+	padding: 2pt 0pt;
+	font-size: 8pt;
+	color: #eeeeee;
+	background-color: #660000;
+	text-align: center;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #000000;
+	border-radius: 10pt 10pt 0pt 0pt;
+}
+.orgThisMember {
+	width: 30pt;
+	margin: 0pt;
+	padding: 2pt;
+	font-size: 10pt;
+	font-weight: bold;
+	color: #fffff;
+	background-color: #990000;
+	text-align: center;
+	border-style: solid;
+	border-width: 1px;
+	border-color: #000000;
+	border-radius: 10pt 10pt 0pt 0pt;
+}
+.hexxTable {
+	top: -50px;
+	position: relative;
+	-webkit-transform: perspective(600px) rotateX(10deg);
+	-moz-transform: perspective(600px) rotateX(10deg);
+	-ms-transform: perspective(600px) rotateX(10deg);
+	-o-transform: perspective(600px) rotateX(10deg);
+	transform: perspective(600px) rotateX(10deg);
+}
+.hexDiv {
+	width: 74px;
+	height: 66px;
+	text-align: center;
+	vertical-align: bottom;
+	font-size: 10pt;
+	font-family: "Arial Narrow";
+	color: #000000;
+	font-weight: normal;
+	overflow: visible;
+}
+.hex {
+	min-width: 38px;
+	min-height: 66px;
+	padding: 0px;
+	vertical-align: bottom;
+	background-color: #660000;
+	position: relative;
+}
+.hexContent {
+	min-width: 74px;
+	min-height: 66px;
+	padding: 0px;
+	position: relative;
+}
+.hexLeft, .hexRight {
+	height: 66px;
+	padding: 0px;
+	position: relative;
+	border-top: 33px solid transparent;
+	border-bottom: 33px solid transparent;
+}
+.hexLeft {
+	border-right: 18px solid #660000;
+}
+.hexRight {
+	border-left: 18px solid #660000;
+}
+.hexOffset0 {
+	top: -34px;
+}
+.hexSpacer {
+	width: 10px;
+}
+.table_footnote {
+	font-size: 10pt;
+	color: #eeeeee;
+	background-color: #ffffff;
+	font-style: italic;
+	text-align: left
+}
+.noheader {
+	color: #cccccc;
+	background-color: #eeeeee;
+	text-align: left
+}
+.statBlockSpacer {
+	padding-left: 30pt;
+}
+.statBlockTitle {
+	font-size: 13pt;
+	background-color: #333333;
+	width: 475px;
+	max-width: 475px;
+	border-width: 1px 0px 1px;
+	border-style: solid;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+.statBlockSection, .statBlockDoubleSection {
+	font-size: 10pt;
+	background-color: #333333;
+	width: 475px;
+	max-width: 475px;
+	border-width: 1px 0px 1px;
+	border-style: solid;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+.statBlockDoubleSection {
+	width: 995px;
+	max-width: 995px;
+}
+.statBlockDetail {
+	width: 475px;
+	max-width: 475px;
+	min-width: 475px;
+}
+.statBlockLabel {
+	font-weight: bold;
+}
+.statBlockRead {
+	max-width: 995px;
+}
+.statBlockEdit {
+	max-width: 475px;
+}
+.statBlockControl {
+	text-align: right;
+	position: relative;
+	width: 50px;
+	height: 0px;
+	left: -60px;
+	
+}
+.spellTitle {
+	position: relative;
+	left: -30px;
+}
+.spellBlock {
+	margin-left: 30px;
+}
+.manyToMany {
+	background-color: #999999;
+	padding: 2pt 0pt 3pt 0pt;
+	border-style: none;
+	border-width: 2pt;
+	border-radius: 10pt;
+	margin: 0px;
+}
+.storyColumn, .chapterColumn {
+	padding: 0px;
+	padding-top: 5px;
+	margin: 0px;
+	width: 200px;
+	max-width: 200px;
+}
+.encounterColumn {
+	padding: 0px;
+	padding-top: 5px;
+	margin: 0px;
+	width: 700px;
+}
+
+a:link { color:#aa3129; text-decoration:none }
+a:active { color:#aa3129; text-decoration:underline overline }
+a:visited { color:#aa3129; text-decoration:none }
+a:hover { color:#aa3129; text-decoration:underline overline }
+
+a.noHighlight {
+	color:#eeeeee;
+	text-decoration: none;
+}

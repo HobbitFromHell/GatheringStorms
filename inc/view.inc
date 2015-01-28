@@ -49,19 +49,18 @@ function build_org($paramOrganizationID, $paramMember, $paramOrganizationList)
 	}
 
 	// add new follower button
-	if($paramOrganizationList[id] == $paramMember) {
+	if($pkid == $paramMember) {
 		echo("<td class=\"orgTD\">");
 		echo("<table class=\"orgTable\"><tr class=\"orgTR\">");
-		echo("<td class=\"orgMember\" colspan=\"99\">");
-		echo("<form action=\"add/?id=0\" method=\"POST\" id=\"addNewOrgMember\">");
+		echo("<td class=\"orgMember\" colspan=\"99\" style=\"padding-top: 7px;\">");
+		echo("<form action=\"add/?id=0\" method=\"POST\" id=\"addNewMemberOrg{$paramOrganizationID}\">");
 		echo("<input type=\"hidden\" name=\"organization\" value=\"{$paramOrganizationList[organization][$paramOrganizationID][org_id]}\">");
 		echo("<input type=\"hidden\" name=\"master\" value=\"{$paramMember}\">");
 		echo("<input type=\"hidden\" name=\"name\" value=\"\">");
 		echo("<input type=\"hidden\" name=\"favoured_class\" value=\"COM\">");
 		echo("<input type=\"hidden\" name=\"location\" value=\"{$paramOrganizationList[organization][$paramOrganizationID][location]}\">");
-		echo("<a class=\"noHighlight\" href=\"\" onClick=\"document.getElementById('addNewOrgMember').submit();return false;\">+<br>New</a></form></td>");
-		echo("</tr><tr class=\"orgTR\"><td class=\"orgTD\"><br>");
-		echo("</tr></table>");
+		echo("<input type=\"button\" onClick=\"$('#addNewMemberOrg{$paramOrganizationID}').submit();return false;\" value=\"+\"></form>");
+		echo("</td></tr></table>");
 		echo("</td>");
 	}
 

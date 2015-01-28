@@ -138,6 +138,18 @@ function ajaxRequestNEW()
 
 function serializeParams(sName)
 {
+	var text = ""
+	$('#' + sName + 'Edit > #' + sName + 'Form *:input').each(function() {
+			if($(this).prop('id')) {
+	    	text += $(this).prop('id') + '=' + $(this).val() + '&'
+	    }
+		})
+	alert(text)
+	return text
+}
+
+function XserializeParams(sName)
+{
 	var x = document.getElementById(sName + "Form")
 //			var x = $("#" + sName + "Form")
 	for(var i = 0, text = ""; i < x.length; i++) {

@@ -144,33 +144,6 @@ function serializeParams(sName)
 	    	text += $(this).prop('id') + '=' + $(this).val() + '&'
 	    }
 		})
-	alert(text)
-	return text
-}
-
-function XserializeParams(sName)
-{
-	var x = document.getElementById(sName + "Form")
-//			var x = $("#" + sName + "Form")
-	for(var i = 0, text = ""; i < x.length; i++) {
-		if(x.elements[i].id > "") {
-	    	if(x.elements[i].multiple) {
-					for(var j = 0, tmpValue = ""; j < x.elements[i].selectedOptions.length; j++) {
-						tmpValue += x.elements[i].selectedOptions[j].value + ","
-					}
-		    	text += x.elements[i].id + "=" + tmpValue + "&"
-	    	}
-	    	else {
-		    	text += x.elements[i].id + "=" + x.elements[i].value + "&"
-	    	}
-
-// Find out if more than one option in a drop-down list can be selected:
-// var x = document.getElementById("mySelect").multiple;
-
-// HTMLSelectElement.selectedOptions Read only
-// Returns a live HTMLCollection containing the set of options that are selected.
-	    }
-	}
 	return text
 }
 

@@ -232,14 +232,14 @@ class BuildOutput
 					if($delete) {
 						$this->addEdit("<input type=\"button\" value=\"-\" onClick=\"this.parentNode.style.display='none'; for(var x = 0; x < this.parentNode.childNodes.length; x++) if(this.parentNode.childNodes[x].id && this.parentNode.childNodes[x].id.substr(0, 10) == 'is_deleted') this.parentNode.childNodes[x].value = 'Yes';\">");
 					}
-					$this->addEdit("</span>&nbsp;");
+					$this->addEdit("&nbsp;</span>");
 					if($break and $paramField[$i][id] != 0) {
 						$this->addEdit("<br>");
 					}
 					$i++;
 				}
 				// add new button
-				$this->addEdit("<span id=\"div{$paramColumnName}addnew\"><input type=\"button\" id=\"addnew{$paramColumnName}\" value=\"+\" onClick=\"var tmpCounter=universalHFH.addNewCounter(); var tmpContent = document.getElementById('div{$paramColumnName}0').cloneNode(true); tmpContent.id = tmpContent.id.substr(0, tmpContent.id.length - 1) + tmpCounter; for(var x = 0; x < tmpContent.childNodes.length; x++) if(tmpContent.childNodes[x].id && tmpContent.childNodes[x].id.indexOf('0')) tmpContent.childNodes[x].id = tmpContent.childNodes[x].id.substr(0, tmpContent.childNodes[x].id.indexOf('0')) + tmpCounter; document.getElementById('div{$paramColumnName}placenew').appendChild(tmpContent); var tmpSpacer = document.getElementById('spacer').cloneNode(true); tmpCounter; document.getElementById('div{$paramColumnName}placenew').appendChild(tmpSpacer); document.getElementById('div{$paramColumnName}' + tmpCounter).style.display='inline';\"></span>\n<span id=\"div{$paramColumnName}placenew\"></span>\n<span id=\"spacer\"> </span>");
+				$this->addEdit("<span id=\"div{$paramColumnName}addnew\"><input type=\"button\" id=\"addnew{$paramColumnName}\" value=\"+\" onClick=\"copyFromTemplate('{$paramColumnName}')\"><span id=\"spacer\"> </span></span>\n");
 			}
 		}
 	}

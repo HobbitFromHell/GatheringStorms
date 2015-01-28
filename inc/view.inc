@@ -217,7 +217,7 @@ function drawEncounter ($paramStory, $paramChapter, $paramEncounter)
 function drawHexMap ($paramX, $paramY, $paramRad, $paramLocation)
 {
 	$varContent = "<table class=\"hexTable\">\n";
-	if($paramX % 2 === 1) {
+	if($paramX % 2 != 0) {
 		$varContent .= "<br><br>"; // equal out the offset staggering used to create the hex map
 	}
 	for($varRow = -1 * $paramRad; $varRow <= $paramRad; $varRow++) { // loop through rows (2 * radius + 1)

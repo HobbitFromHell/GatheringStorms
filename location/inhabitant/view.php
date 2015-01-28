@@ -11,7 +11,7 @@ $output->addEdit("<form action=\"/character/add/?id=0\" method=\"POST\" id=\"add
 $output->addEdit("<input type=\"hidden\" name=\"name\" value=\"\">");
 $output->addEdit("<input type=\"hidden\" name=\"favoured_class\" value=\"COM\">");
 $output->addEdit("<input type=\"hidden\" name=\"location\" value=\"{$pkid}\">");
-$output->addEdit("<input type=\"submit\" name=\"create\" value=\"Create New Character\" onClick=\"document.getElementById('addNewCastMember').submit();\">");
+$output->addEdit("<input type=\"submit\" name=\"create\" value=\"Create New Character Here\" onClick=\"$('#addNewCastMember').submit();\">");
 
 // build character list
 //unset($view->encounterCast['list']);

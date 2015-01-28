@@ -285,7 +285,7 @@ class BuildOutput
 		";
 		if($paramScope == 1) {
 			$this->outputRead = "
-				<img src=\"/img/edit.png\" onClick=\"swapSection('{$this->lcSectionName()}')\">
+				<img src=\"/img/edit.png\" onClick=\"editSection('{$this->lcSectionName()}')\">
 			{$this->outputRead}
 			";
 		}
@@ -302,7 +302,7 @@ class BuildOutput
 		<form id=\"{$this->lcSectionName()}Form\">
 			<div id=\"{$this->lcSectionName()}ReadControl\" class=\"statBlockControl\" style=\"align:right\">
 				<img src=\"/img/check.png\" onClick=\"saveSection('{$this->lcSectionName()}', serializeParams('{$this->lcSectionName()}'))\">
-				<img src=\"/img/batsu.png\" onClick=\"swapSection('{$this->lcSectionName()}')\">
+				<img src=\"/img/batsu.png\" onClick=\"abortSection('{$this->lcSectionName()}')\">
 			</div>
 			{$this->outputEdit}
 		</form>

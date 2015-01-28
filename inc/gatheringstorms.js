@@ -2,8 +2,10 @@ var loadingWidget = "<img src=\"/img/loading.gif\" vspace=\"10\">"
 var savingWidget = "<img src=\"/img/loading.gif\" vspace=\"10\">"
 
 // variable javascript collection for all pages
-var UniversalHFH = {
+var universalHFH = {
 	newCounter: 0,
+	varEditing: 0,
+	varWarning: 0,
 
 	// calculate bonus of given ability score
 	addNewCounter: function ()
@@ -11,28 +13,56 @@ var UniversalHFH = {
 		this.newCounter--
 		return this.newCounter
 	},
+
+	// track number of editting sections and warn if too many are open
+	addEdit: function ()
+	{
+		this.varEditing++
+		if(this.varEditing > 1 && !this.varWarning) {
+			alert('You are editing multiple sections.\nPlease save any previous edits to avoid losing them.')
+			this.varWarning = 1
+		}
+	},
+	removeEdit: function ()
+	{
+		this.varEditing--
+	},
 }
 
-function swapSection(sName)
+function editSection(sName)
 {
-	temp = document.getElementById(sName + "Read").style.display
-	document.getElementById(sName + "Read").style.display = document.getElementById(sName + "Edit").style.display
-	document.getElementById(sName + "Edit").style.display = temp
+	$('#' + sName + 'Edit').clone().appendTo($('#' + sName + 'Edit').parent())
+		.attr('id', sName + 'EditBackup')
+	$('#' + sName + 'Read').hide()
+	$('#' + sName + 'Edit').show()
+	universalHFH.addEdit()
+}
+
+function abortSection(sName)
+{
+	$('#' + sName + 'Edit').hide()
+	$('#' + sName + 'Read').show()
+	if($('#' + sName + 'EditBackup')) {
+		$('#' + sName + 'Edit').remove()
+		$('#' + sName + 'EditBackup').attr('id', sName + 'Edit')
+	}
+	universalHFH.removeEdit()
 }
 
 function saveSection(sName, params)
 {
-	document.getElementById(sName + "Read").innerHTML = savingWidget
-	document.getElementById(sName + "Edit").style.display = "none"
-	document.getElementById(sName + "Read").style.display = "block"
+	$('#' + sName + 'Read').html(savingWidget)
+	$('#' + sName + 'Edit').hide()
+	$('#' + sName + 'Read').show()
 	buildSection(sName, params)
+	universalHFH.removeEdit()
 }
 
 function reloadSection(sName)
 {
-	document.getElementById(sName + "Read").innerHTML = loadingWidget
-	document.getElementById(sName + "Edit").style.display = "none"
-	document.getElementById(sName + "Read").style.display = "block"
+	$('#' + sName + 'Read').html(loadingWidget)
+	$('#' + sName + 'Edit').hide()
+	$('#' + sName + 'Read').show()
 	buildSection(sName)
 }
 
@@ -54,8 +84,7 @@ function buildSection(sName, params)
 		if (this.readyState == 4) {
 			if (this.status == 200) {
 				if (this.responseText != null) {
-//JS							document.getElementById(sectionName).innerHTML = this.responseText
-					$('#'+sectionName).html(this.responseText)
+					$('#' + sectionName).html(this.responseText)
 				} else alert("AJAX Response: NULL\r\n" + sectionFilename)
 			} else alert("AJAX Error Status: " + this.status + "\r\n" + sectionFilename)
 		}

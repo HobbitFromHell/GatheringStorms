@@ -149,3 +149,26 @@ function printobj(obj)
 	}
     return map
 }
+
+function copyFromTemplate(paramColumnName)
+{
+	// create unique ID number for new record
+	var varNewID = universalHFH.addNewCounter()
+
+	// clone template for new record, change ID, make visible, and append after add button
+	$('#div' + paramColumnName + '0').clone()
+		.attr('id', 'div' + paramColumnName + '0' + varNewID)
+		.appendTo($('#div' + paramColumnName + 'addnew'))
+		.css('display', 'inline')
+
+	// same ID change to all child elements
+	var varTemplateClone = $('#div' + paramColumnName + '0' + varNewID + ' > *')
+	for(var i = 0; i < varTemplateClone.length; i++){
+		if(varTemplateClone[i].id) {
+			varTemplateClone[i].id += varNewID
+		}
+	}
+
+	// this spacer is added between the clones to keep them from spanning multiple lines
+	$('#spacer').clone().appendTo($('#div' + paramColumnName + 'addnew'))
+}

@@ -7,7 +7,7 @@ $output = new BuildOutput("Spells");
 $output->add("id", $pkid, 0, 0);
 $output->add("class_list", $post_class_list, 0, 0);
 
-if($view->characterSpells[spell]['ADP']) {
+if($view->class_list['ADP']) {
 	// adept spells known
 	$output->addRead("<div id='calcADPSpellBlock' class='spellBlock'>");
 	$output->add("", "<span id='calcADPKnown' class='spellTitle'></span>", "", "<span id='editADPKnown'></span>");
@@ -21,12 +21,12 @@ if($view->characterSpells[spell]['ADP']) {
 	$output->addRead("</div>");
 }
 
-if($view->characterSpells[spell]['BRB']) {
+if($view->class_list['BBN']) {
 	// barbarian rage powers
 	$output->addEdit("<span id='editRagePowers'></span>", "");
 }
 
-if($view->characterSpells[spell]['BRD']) {
+if($view->class_list['BRD']) {
 	// bard spells known
 	$output->addRead("<div id='calcBRDSpellBlock' class='spellBlock'>");
 	$output->add("", "<span id='calcBRDKnown' class='spellTitle'></span>", "", "<span id='editBRDKnown'></span>");
@@ -40,7 +40,7 @@ if($view->characterSpells[spell]['BRD']) {
 	$output->addRead("</div>");
 }
 
-if($view->characterSpells[spell]['DRD'] || $view->characterSpells[spell]['CLR']) {
+if($view->class_list['DRD'] || $view->characterSpells[spell]['CLR']) {
 	// cleric & druid spells, with domain spells
 	$output->addRead("<div id='calcCLRSpellBlock' class='spellBlock'>");
 	$output->add("", "<span id='calcCLRKnown' class='spellTitle'></span>", "", "<span id='editCLRKnown'></span>");
@@ -80,13 +80,13 @@ if($view->characterSpells[spell]['DRD'] || $view->characterSpells[spell]['CLR'])
 	$output->add("", "<span id='calcDomainPowers'></span>", "", "<span id='editChannelEnergy'></span>");
 }
 
-if($view->characterSpells[spell]['FTR']) {
+if($view->class_list['FTR']) {
 	// fighter training
 	$output->addEdit("<span id='editWeaponGroup'></span>", "");
 	$output->addEdit("<span id='editWeaponMastery'></span>", "");
 }
 
-if($view->characterSpells[spell]['PAL']) {
+if($view->class_list['PAL']) {
 	// paladin spells
 	$output->addRead("<div id='calcPALSpellBlock' class='spellBlock'>");
 	$output->add("", "<span id='calcPALKnown' class='spellTitle'></span>", "", 0);
@@ -97,7 +97,7 @@ if($view->characterSpells[spell]['PAL']) {
 	$output->addRead("</div>");
 }
 
-if($view->characterSpells[spell]['RGR']) {
+if($view->class_list['RGR']) {
 	// ranger spells
 	$output->addEdit("<span id='editFavouredEnemy'></span>", "");
 	$output->addRead("<div id='calcRGRSpellBlock' class='spellBlock'>");
@@ -109,7 +109,7 @@ if($view->characterSpells[spell]['RGR']) {
 	$output->addRead("</div>");
 }
 
-if($view->characterSpells[spell]['SOR']) {
+if($view->class_list['SOR']) {
 	// sorcerer spells known
 	$output->addRead("<div id='calcSORSpellBlock' class='spellBlock'>");
 	$output->add("", "<span id='calcSORKnown' class='spellTitle'></span>", "", "<span id='editSORKnown'></span>");
@@ -128,7 +128,7 @@ if($view->characterSpells[spell]['SOR']) {
 	$output->add("", "<span id='calcBloodline'></span>", "", "<span id='editBloodline'></span>");
 }
 
-if($view->characterSpells[spell]['WIZ']) {
+if($view->class_list['WIZ']) {
 	// wizard spells
 	$output->addRead("<div id='calcWIZSpellBlock' class='spellBlock'>");
 	$output->add("", "<span id='calcWIZKnown' class='spellTitle'></span>", "", "<span id='editWIZKnown'></span>");

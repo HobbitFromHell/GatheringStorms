@@ -33,6 +33,7 @@ $view->characterSpells[class_list] = json_decode($_POST[class_list]);
 // build class spell lists
 $varIncludeDomain = false;
 foreach($view->characterSpells[class_list] as $varClassID => $varClassLevel) {
+	$view->class_list[$varClassID] = $varClassLevel;
 	if($varClassID == "CLR" or $varClassID == "DRD") {
 		// only bother building domain spells lists for classes which can use them
 		$varIncludeDomain = true;

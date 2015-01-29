@@ -68,83 +68,36 @@ function reloadSection(sName)
 
 function buildSection(sName, params)
 {
-	if (!params) {
-		params = ""
-	}
-	sectionName = sName.toLowerCase() + "Section"
-	sectionFilename = location.pathname.substring(0, location.pathname.indexOf(".")) + sName.toLowerCase() + "/?id=" + pkid
-	request = Array();
-	request[sName] = new ajaxRequest()
-	request[sName].open("POST", sectionFilename, true)
-	request[sName].setRequestHeader("Content-type", "application/x-www-form-urlencoded")
-//	request[sName].setRequestHeader("Content-length", params.length)
-//	request[sName].setRequestHeader("Connection", "close")
-	request[sName].onreadystatechange = function()
-	{
-		if (this.readyState == 4) {
-			if (this.status == 200) {
-				if (this.responseText != null) {
-					$('#' + sectionName).html(this.responseText)
-				} else alert("AJAX Response: NULL\r\n" + sectionFilename)
-			} else alert("AJAX Error Status: " + this.status + "\r\n" + sectionFilename)
-		}
-	}
-	request[sName].send(params)
-}
-
-function ajaxRequest()
-{
-	try {
-		var request = new XMLHttpRequest()
-	}
-	catch(e1) {
-		try {
-			request = new ActiveXObject("Msxml2.XMLHTTP")
-		}
-		catch(e2) {
-			try {
-				request = new ActionXObject("Microsoft.XMLHTTP")
-			}
-			catch(e3) {
-				request = false
-			}
-		}
-	}
-	return request
-}
-
-function ajaxRequestNEW()
-{
-	var XMLHttpRequestObjects = new Array()
-
-	try {
-		XMLHttpRequestObjects.push(new XMLHttpRequest())
-	}
-	catch(e1) {
-		try {
-			XMLHttpRequestObjects.push(new ActiveXObject("Msxml2.XMLHTTP"))
-		}
-		catch(e2) {
-			try {
-				XMLHttpRequestObjects.push(new ActionXObject("Microsoft.XMLHTTP"))
-			}
-			catch(e3) {
-				XMLHttpRequestObjects.push(false)
-			}
-		}
-	}
-	return XMLHttpRequestObjects.pop()
+	$.ajax({
+		url: location.pathname.substring(0, location.pathname.indexOf(".")) + sName.toLowerCase() + "/?id=" + pkid,
+		type: "POST",
+		data: params,
+		contentType: 'application/x-www-form-urlencoded',
+		cache: false,
+		processData: true,
+		success: function(e)
+		{
+			$('#' + sName.toLowerCase() + "Section").html(e)
+		},
+		error: function(e)
+		{
+			alert('ERROR\n' + printobj(e) + '\nSection Name: ' + sName + '\nParams: ' + printobj(params));
+		},
+	});
 }
 
 function serializeParams(sName)
 {
-	var text = ""
+	// var text = ""
+	var params = {}
 	$('#' + sName + 'Edit > #' + sName + 'Form *:input').each(function() {
 			if($(this).prop('id')) {
-	    	text += $(this).prop('id') + '=' + $(this).val() + '&'
-	    }
+				// text += $(this).prop('id') + '=' + $(this).val() + '&'
+				params[$(this).prop('id')] = $(this).val()
+			}
 		})
-	return text
+	// return text
+	return params
 }
 
 function printobj(obj)

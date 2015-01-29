@@ -74,19 +74,15 @@ input[type="button"] {
 	font-weight: bold;
 	padding: 0pt 4pt 0pt 5px;
 	background-color: #ff9999;
-	border-style: solid;
-	border-width: 2pt;
 	border-color: #ff6666;
 	border-radius: 15pt;
 	margin: 1px;
 }
-input[type="submit"] {
+input[type="submit"], input[type="file"], input[type="upload"] {
 	font-size: 13pt;
 	font-weight: bold;
 	padding: 0pt 4pt 0pt 5px;
 	background-color: #ff9999;
-	border-style: solid;
-	border-width: 2pt;
 	border-color: #ff6666;
 	border-radius: 15pt;
 	margin: 1px;

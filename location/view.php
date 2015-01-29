@@ -30,6 +30,7 @@ if(isset($pkid)) {
 
 				<h6 class="statBlockDoubleSection">Maps</h6>
 				<div id="mapSection"></div>
+				<div id="localmapSection"></div>
 
 				<h6 class="statBlockDoubleSection">Organizations</h6>
 				<div id="organizationSection"></div>

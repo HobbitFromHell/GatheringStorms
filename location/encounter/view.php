@@ -12,7 +12,7 @@ $output->addEdit("<input type=\"hidden\" name=\"name\" value=\"\">");
 $output->addEdit("<input type=\"hidden\" name=\"favoured_class\" value=\"COM\">");
 $output->addEdit("<input type=\"hidden\" name=\"chapter\" value=\"0\">");
 $output->addEdit("<input type=\"hidden\" name=\"location_id\" value=\"{$pkid}\">");
-$output->addEdit("<input type=\"submit\" name=\"create\" value=\"Create New Encounter Here\" onClick=\"document.getElementById('addNewLocalEncounter').submit();\">");
+$output->addEdit("<input type=\"submit\" name=\"create\" value=\"Create New Encounter Here\" onClick=\"$('#addNewLocalEncounter').submit();\">");
 
 // build character list
 //unset($view->encounterCast['list']);

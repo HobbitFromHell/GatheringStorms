@@ -18,7 +18,7 @@ $output->addEdit("<form action=\"/encounter/add/?id=0\" method=\"POST\" id=\"add
 $output->addEdit("<input type=\"hidden\" name=\"name\" value=\"\">");
 $output->addEdit("<input type=\"hidden\" name=\"chapter\" value=\"0\">");
 $output->addEdit("<input type=\"hidden\" name=\"character_id\" value=\"{$pkid}\">");
-$output->addEdit("<input type=\"submit\" name=\"create\" value=\"Create New Encounter\" onClick=\"document.getElementById('addNewEncounter').submit();\">");
+$output->addEdit("<input type=\"submit\" name=\"create\" value=\"Create New Encounter\" onClick=\"$('#addNewEncounter').submit();\">");
 
 if($view->characterEncounter[0]) {
 	$output->addRead(buildEncList($view->characterEncounter));

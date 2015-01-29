@@ -950,13 +950,14 @@ if($pkid == 0) {
 			// build special quality description
 			sq_build: function ()
 			{
-				console.log("sq_build ... ")
+				console.log("function sq_build()")
+
 				charSheet.sq_desc = charSheet.getValue("sq_features") + charSheet.getValue("sq_feats")
 
 				// BBN
 				if(charSheet.getValue("outputRagePowers")) {
 					$('#editRagePowers').html("Rage Powers " + charSheet.getValue("outputRagePowers"))
-					document.getElementById('spellsSection').style.display = "block"
+					$('#spellsSection').show()
 				}
 
 				// BRD
@@ -1010,7 +1011,7 @@ if($pkid == 0) {
 				// FTR
 				if(charSheet.getValue("outputWeaponGroup")) {
 					$('#editWeaponGroup').html("<br>Weapon Training " + charSheet.getValue("outputWeaponGroup"))
-					document.getElementById('spellsSection').style.display = "block"
+					$('#spellsSection').show()
 				}
 				if(charSheet.getValue("outputWeaponMastery")) {
 					$('#editWeaponMastery').html("<br>Weapon Mastery " + charSheet.getValue("outputWeaponMastery"))
@@ -1038,7 +1039,7 @@ if($pkid == 0) {
 				// RGR
 				if(charSheet.getValue("outputFavouredEnemy")) {
 					$('#editFavouredEnemy').html("<br>Favoured Enemy " + charSheet.getValue("outputFavouredEnemy"))
-					document.getElementById('spellsSection').style.display = "block"
+					$('#spellsSection').show()
 				}
 				if(!charSheet.isEmpty(charSheet.getValue("sq_favoured_terrain"))) {
 //					charSheet.sq_desc += ", favoured terrain (" + charSheet.getValue("sq_favoured_terrain").substr(2) + ")"
@@ -1102,12 +1103,13 @@ if($pkid == 0) {
 
 				if(charSheet.getValue("sq_desc")) {
 					$('#calcSQ').html("<b>SQ</b> " + charSheet.getValue("sq_desc").substr(2))
-					document.getElementById('specialqualitiesSection').style.display = "block"
+					$('#specialqualitiesSection').show()
 				}
 				else {
 					$('#calcSQ').text(" ")
-					document.getElementById('specialqualitiesSection').style.display = "none"
+					$('#specialqualitiesSection').hide()
 				}
+
 				console.log(" ... CHECK")
 			},
 
@@ -1156,10 +1158,8 @@ if($pkid == 0) {
 					if(tmpClass == "DRD") {
 						tmpClass = "CLR"
 					}
-					document.getElementById('spellsSection').style.display = "block"
-					if(document.getElementById('calc' + tmpClass + 'SpellBlock')) {
-						document.getElementById('calc' + tmpClass + 'SpellBlock').style.display = "block"
-					}
+					$('#spellsSection').show()
+					$('#calc' + tmpClass + 'SpellBlock').show()
 				}
 			},
 
@@ -1179,30 +1179,33 @@ if($pkid == 0) {
 		// calculate main section
 		function calcMain()
 		{
-				console.log("calcMain ... ")
+			console.log("function calcMain()")
+
 			charSheet.init_feats = 0
 			$('#calcSize').text(charSheet.getValue("size"))
 			$('#calcInit').text(10 + charSheet.bonus(charSheet.getValue("dex")) + charSheet.getValue("init_feats"))
-			charSheet.cr = document.getElementById('cr').value
-			charSheet.total_level = document.getElementById('total_level').value
-			charSheet.hp_main = document.getElementById('hp_main').value
-			charSheet.hp_desc_main = document.getElementById('hp_desc_main').value
-			charSheet.sp_main = document.getElementById('sp_main').value
-			charSheet.sp_bonus = document.getElementById('sp_bonus').value
-			charSheet.total_bab = document.getElementById('total_bab').value
-			charSheet.total_fort = document.getElementById('total_fort').value
-			charSheet.total_ref = document.getElementById('total_ref').value
-			charSheet.total_will = document.getElementById('total_will').value
+			charSheet.cr = $('#cr').val()
+			charSheet.total_level = $('#total_level').val()
+			charSheet.hp_main = $('#hp_main').val()
+			charSheet.hp_desc_main = $('#hp_desc_main').val()
+			charSheet.sp_main = $('#sp_main').val()
+			charSheet.sp_bonus = $('#sp_bonus').val()
+			charSheet.total_bab = $('#total_bab').val()
+			charSheet.total_fort = $('#total_fort').val()
+			charSheet.total_ref = $('#total_ref').val()
+			charSheet.total_will = $('#total_will').val()
 
 			// recalculate sections
 			calcSpecialabilities()
-				console.log(" ... CHECK")
+
+			console.log(" ... CHECK")
 		}
 
 		// calculate defense section
 		function calcDefense()
 		{
-				console.log("calcDefense ... ")
+			console.log("function calcDefense()")
+
 			charSheet.armour_build()
 			charSheet.hp_build()
 			$('#calcFort').text(10 + 1 * charSheet.getValue("total_fort") + charSheet.bonus(charSheet.getValue("con")) + 1 * charSheet.getValue("fort_traits") + 1 * charSheet.getValue("fort_feats"))
@@ -1211,13 +1214,15 @@ if($pkid == 0) {
 			charSheet.sd_build()
 			charSheet.dr_build()
 			charSheet.immune_build()
-				console.log(" ... CHECK")
+
+			console.log(" ... CHECK")
 		}
 
 		// calculate offense section
 		function calcOffense()
 		{
-				console.log("calcOffense ... ")
+			console.log("function calcOffense()")
+
 			charSheet.speed_build()
 			$('#calcBAB').text(10 + 1 * charSheet.getValue("total_bab"))
 			charSheet.cmb_build()
@@ -1227,7 +1232,8 @@ if($pkid == 0) {
 			charSheet.ranged_build()
 			charSheet.sa_build()
 			charSheet.spells_build()
-				console.log(" ... CHECK")
+
+			console.log(" ... CHECK")
 		}
 
 		// calculate ability score section
@@ -1946,7 +1952,8 @@ if($pkid == 0) {
 		// calculate skills subsection
 		function calcSkills()
 		{
-				console.log("calcSkills ... ")
+			console.log("function calcSkills()")
+
 			// set default values for skills
 			charSheet.total_sp_used = 0
 			charSheet.lp_skills = 0
@@ -2006,14 +2013,15 @@ if($pkid == 0) {
 
 					// update read/edit sections
 					$('#spantotal' + charSheet.getValue("skills." + i + ".id")).text(charSheet.getValue("skills." + i + ".total"))
-					document.getElementById('total' + charSheet.getValue("skills." + i + ".id")).value = charSheet.getValue("skills." + i + ".total")
+					//$('#total' + charSheet.getValue("skills." + i + ".id")).value = charSheet.getValue("skills." + i + ".total")
 				}
 			}
 
 			// recalculate sections
 			charSheet.sp_build()
 			charSheet.senses_build()
-				console.log(" ... CHECK")
+
+			console.log(" ... CHECK")
 		}
 
 		// calculate languages subsection
@@ -3461,7 +3469,7 @@ if($pkid == 0) {
 				console.log("calcTreasure ... ")
 			// gold
 			var tmpMaxValue
-			charSheet.total_value = document.getElementById('total_value').value
+			charSheet.total_value = $('#total_value').val()
 			switch(charSheet.getValue("cr")) {
 				case "1/3":
 				case "-3": tmpMaxValue = 260; break;
@@ -3492,7 +3500,7 @@ if($pkid == 0) {
 
 			// load
 			var tmpLoad
-			charSheet.total_weight = document.getElementById('total_weight').value
+			charSheet.total_weight = $('#total_weight').val()
 			var tmpCarryingCap = charSheet.getNumber("lightLoad") * charSheet.getNumber("carrying_cap_feats")
 			if(charSheet.getNumber("total_weight") <= tmpCarryingCap) {
 				tmpLoad = "light load"

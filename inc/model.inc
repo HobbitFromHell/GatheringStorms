@@ -140,6 +140,9 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 		$postID = sanitize($_POST[id]);
 		$postArray = Array();
 		foreach($_POST as $varKey => $varValue) {
+			if(is_array($varValue)) {
+				$varValue = implode(",", $varValue);
+			}
 			// find post parameters with tailing numeric portion, which is the primary key (negative value = insert new record)
 			preg_match("/^([a-z_]+)([-\d]+)$/", $varKey, $varMatches);
 			if(isset($varMatches[2])) { // tailing numeric portion found

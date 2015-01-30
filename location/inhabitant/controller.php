@@ -16,16 +16,16 @@ if(strpos($pkid, "x") < 1) {
 
 $view = new DataCollector;
 
-// find the cr of item #10 on the list, and use in the following select
-$view->locationInhabitant[top10] = DataConnector::selectQuery("
+// find the cr of item #16 on the list, and use in the following select
+$view->locationInhabitant[top] = DataConnector::selectQuery("
 	 SELECT pc.`cr`              AS `cr`
 	   FROM t_characters pc
 	  WHERE pc.`location_id` = '{$pkid}'
 	  ORDER BY pc.`cr` DESC
-	  LIMIT 1 OFFSET 10
+	  LIMIT 1 OFFSET 16
 ");
-if(!$view->locationInhabitant[top10]) {
-	$view->locationInhabitant[top10][cr] = 0;
+if(!$view->locationInhabitant[top]) {
+	$view->locationInhabitant[top][cr] = 0;
 }
 
 $j = DataConnector::selectQuery("
@@ -45,7 +45,7 @@ $j = DataConnector::selectQuery("
 	   JOIN t_locations l
 	     ON pc.`location_id` = l.`id`
 	  WHERE pc.`location_id` = '{$pkid}'
-	    AND pc.`cr` >= {$view->locationInhabitant[top10][cr]}
+	    AND pc.`cr` >= {$view->locationInhabitant[top][cr]}
 	  GROUP BY pc.`id`
 	  ORDER BY pc.`cr` DESC
 ");

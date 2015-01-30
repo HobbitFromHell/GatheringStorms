@@ -9,7 +9,7 @@ if($pkid > 0) {
 ?>
 	<table>
 		<tr>
-			<td class="statBlockSpacer">
+			<td class="statBlockSingleWide statBlockSpacer">
 
 				<h6 class="statBlockSection">Story</h6>
 				<div id="storySection"></div>
@@ -21,13 +21,14 @@ if($pkid > 0) {
 				<div id="sceneSection"></div>
 
 			</td>
-			<td class="statBlockSpacer">
+			<td class="statBlockSingleWide statBlockSpacer">
 
 				<h6 class="statBlockSection">Cast</h6>
 				<div id="castSection"></div>
 
 				<h6 class="statBlockSection">Maps</h6>
 				<div id="mapSection"></div>
+
 			</td>
 		</tr>
 	</table>
@@ -40,9 +41,10 @@ else {
 
 ?>
 	<div class="statBlockSpacer" id="addSection"></div>
-	<!-- navigation -->
+	<br>
 	<form action="/encounter/" method="GET">
-	<table class="statBlockDoubleSection">
+	<!-- navigation -->
+	<table class="searchControlBar">
 		<tr>
 			<td align="left" width="40px"><?php if($getOffset > 0) echo("<input type=\"button\" value=\"<\" onClick=\"document.getElementById('page_start').value = " . max(($getOffset - $getLimit), 0) . "; this.form.submit();\">"); ?></td>
 			<td align="center">
@@ -65,7 +67,7 @@ else {
 	<!-- list -->
 	<div id="statBlockDoubleSection"><?php if($view->encounterList[0]) echo(buildEncList($view->encounterList));?></div>
 	<!-- navigation -->
-	<table class="statBlockDoubleSection">
+	<table class="searchControlBar">
 		<tr>
 			<td align="left" width="40px"><?php if($getOffset > 0) echo("<input type=\"button\" value=\"<\" onClick=\"document.getElementById('page_start').value = " . max(($getOffset - $getLimit), 0) . "; this.form.submit();\">"); ?></td>
 			<td></td>

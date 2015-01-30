@@ -36,13 +36,7 @@ if(isset($_GET[id])) {
 	// if everything is ok, try to upload file
 	if ($uploadOk) {
 		if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-			if ($uploadOk == 2) {
-				// replacement image uploaded, requires refresh of window
-				echo("<script>parent.location.href = '/location/?id={$_GET[id]}';</script>");
-			}
-			else {
-				echo("<script>parent.buildSection('Localmap');</script>");
-			}
+			echo("<script>parent.saveSection('localmap', parent.serializeParams('localmap'));</script>");
 		}
 		else {
 			echo("<script>alert('Sorry, there was an error uploading your file.');</script>");

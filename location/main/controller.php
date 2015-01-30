@@ -14,7 +14,7 @@ if(strpos($pkid, "x") < 1) {
 // insert
 // //////
 
-post_data("t_locations", "id", "id", Array("name", "cr", "alignment", "qualities", "disadvantages", "government", "population", "description"));
+post_data("t_locations", "id", "id", Array("name", "cr", "alignment", "qualities", "disadvantages", "government", "population", "description", "imports", "exports"));
 
 
 // //////
@@ -31,7 +31,9 @@ $view->locationMain = DataConnector::selectQuery("
 	        l.`population`    AS `population`,
 	        l.`government`    AS `government`,
 	        l.`qualities`     AS `qualities`,
-	        l.`disadvantages` AS `disadvantages`
+	        l.`disadvantages` AS `disadvantages`,
+	        l.`imports`       AS `imports`,
+	        l.`exports`       AS `exports`
 	   FROM t_locations l
 	  WHERE l.`id` = '{$pkid}'
 ");

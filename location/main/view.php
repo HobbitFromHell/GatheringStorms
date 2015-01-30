@@ -69,6 +69,14 @@ $output->br();
 // market place subsection
 $output->add("", "<h6 class=\"statBlockSection\">Market Place</h6>", "", "", "");
 
+// imports
+$output->add("imports", $view->locationMain[imports], "Imports", "Imports", 330);
+$output->br();
+
+// exports
+$output->add("exports", $view->locationMain[exports], "Exports", "Exports", 330);
+$output->br();
+
 // base value
 $output->add("", number_format($view->locationMain[base_value]) . " gp", "Base Value", 0, 0);
 // purchase limit

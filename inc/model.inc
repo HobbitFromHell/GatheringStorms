@@ -164,11 +164,12 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 				if($varMatches[1] == $varField[0]) {
 // DEBUG
 // echo("<b> Yes! {$varField[0]} = {$varValue}</b> and count = ");
-// echo(count($postArray[$postAddNewID])+1 . "/" . count($paramDataArray) . "<br>");
 					$postArray[$postAddNewID][$varField[0]] = sanitize($varValue);
+// DEBUG
+// echo(count($postArray[$postAddNewID]) . "/" . count($paramDataArray) . "<br>");
 					if(count($postArray[$postAddNewID]) == count($paramDataArray)) { // the expected number of params
 						// if the id is negative, add a new record
-						if($postAddNewID > 0 or $postArray[$postAddNewID][$paramDataArray[0][0]]) {
+						if($postAddNewID > 0 or isset($postArray[$postAddNewID][$paramDataArray[0][0]])) {
 							$varQuery = "INSERT INTO `{$paramTable}` (`{$paramID}`";
 							if($postAddNewID > 0 && $paramKey && $paramID != $paramKey) {
 								$varQuery .= ", `{$paramKey}`";
@@ -193,6 +194,7 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 // DEBUG
 // echo($varQuery);
 							DataConnector::updateQuery($varQuery);
+// DEBUG
 // echo("DONE");
 						}
 						// unset to avoid collisions during multiple inserts

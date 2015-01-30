@@ -98,7 +98,7 @@ select {
 	width: 100pt;
 }
 textarea {
-	max-width: 475px;
+	max-width: 100%;
 }
 sup {
 	font-weight: bold;
@@ -226,40 +226,49 @@ sup {
 .statBlockTitle {
 	font-size: 13pt;
 	background-color: #333333;
-	width: 475px;
-	max-width: 475px;
+	width: 100%;
 	border-width: 1px 0px 1px;
 	border-style: solid;
 	text-decoration: none;
 	text-transform: uppercase;
 }
-.statBlockSection, .statBlockDoubleSection {
+.statBlockSection {
 	font-size: 10pt;
 	background-color: #333333;
-	width: 475px;
-	max-width: 475px;
+	width: 100%;
 	border-width: 1px 0px 1px;
 	border-style: solid;
 	text-decoration: none;
 	text-transform: uppercase;
-}
-.statBlockDoubleSection {
-	width: 995px;
-	max-width: 995px;
-}
-.statBlockDetail {
-	width: 475px;
-	max-width: 475px;
-	min-width: 475px;
 }
 .statBlockLabel {
 	font-weight: bold;
 }
+.statBlockDoubleWide, .searchControlBar {
+	width: 999px;
+	max-width: 999px;
+	min-width: 999px;
+}
+.statBlockSingleWide {
+	width: 475px;
+	max-width: 475px;
+	min-width: 475px;
+}
+.searchControlBar {
+	padding-left: 30pt;
+	background-color: #333333;
+	width: 100%;
+	border-width: 1px 0px 1px;
+	border-style: solid;
+}
+.statBlockDetail {
+	width: 100%;
+}
 .statBlockRead {
-	max-width: 995px;
+	width: 100%;
 }
 .statBlockEdit {
-	max-width: 475px;
+	width: 100%;
 }
 .statBlockControl {
 	text-align: right;
@@ -295,7 +304,7 @@ sup {
 	padding: 0px;
 	padding-top: 5px;
 	margin: 0px;
-	width: 700px;
+	width: 600px;
 }
 
 a:link { color:#aa3129; text-decoration:none }

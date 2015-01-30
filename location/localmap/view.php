@@ -7,12 +7,16 @@ $output = new BuildOutput("Localmap");
 $output->add("id", $pkid, 0, 0);
 
 // map image
-$output->add("", $view->image, "", "Select local map image to upload: <input type=\"file\" name=\"xlocalmapfile\" id=\"xlocalmapfile\">");
+echo($view->locationLocalmap[image_tag] . "<br>");
 
-echo $output->dump(0);
+// map details
+$output->add("map_details", $view->locationLocalmap[map_details], "", "Map Details<br>", "textarea");
+
+echo $output->dump(1);
 
 ?>
 
+<div id="divFileUpload">
 <form action="/location/upload.php?id=<?php echo $pkid; ?>" method="POST" enctype="multipart/form-data" target="fileUpload">
     Select image to upload:
     <input type="file" name="fileToUpload" id="fileToUpload">
@@ -20,3 +24,7 @@ echo $output->dump(0);
 </form>
 
 <iframe id="fileUpload" name="fileUpload" style="display:none"></iframe>
+</div>
+<script>
+	$('#divFileUpload').appendTo('#localmapEdit')
+</script>

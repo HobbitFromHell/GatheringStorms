@@ -9,12 +9,12 @@ if(isset($pkid)) {
 ?>
 	<table>
 		<tr>
-			<td class="statBlockSpacer">
+			<td class="statBlockSingleWide statBlockSpacer">
 
 				<div id="mainSection"></div>
 
 			</td>
-			<td class="statBlockSpacer">
+			<td class="statBlockSingleWide statBlockSpacer">
 
 				<h6 class="statBlockSection">Inhabitants</h6>
 				<div id="inhabitantSection"></div>
@@ -24,16 +24,18 @@ if(isset($pkid)) {
 	</table>
 	<table>
 		<tr>
-			<td class="statBlockSpacer">
-				<h6 class="statBlockDoubleSection">Encounters</h6>
+			<td class="statBlockDoubleWide statBlockSpacer">
+
+				<h6 class="statBlockSection">Encounters</h6>
 				<div id="encounterSection"></div>
 
-				<h6 class="statBlockDoubleSection">Maps</h6>
+				<h6 class="statBlockSection">Maps</h6>
 				<div id="mapSection"></div>
 				<div id="localmapSection"></div>
 
-				<h6 class="statBlockDoubleSection">Organizations</h6>
+				<h6 class="statBlockSection">Organizations</h6>
 				<div id="organizationSection"></div>
+
 			</td>
 		</tr>
 	</table>
@@ -47,9 +49,9 @@ else {
 ?>
 	<br>
 	<br>
-	<!-- navigation -->
 	<form action="/location/" method="GET">
-	<table class="statBlockDoubleSection">
+	<!-- navigation -->
+	<table class="searchControlBar">
 		<tr>
 			<td align="left" width="40px"><?php if($getOffset > 0) echo("<input type=\"button\" value=\"<\" onClick=\"document.getElementById('page_start').value = " . max(($getOffset - $getLimit), 0) . "; this.form.submit();\">"); ?></td>
 			<td align="center">
@@ -70,7 +72,7 @@ else {
 		</tr>
 	</table>
 	<!-- list -->
-	<table>
+	<table class="statBlockDoubleWide statBlockSpacer">
 		<tr>
 			<td class="statBlockDetail">
 <?php if($view->locationListLeft[0]) echo(buildLocList($view->locationListLeft));?>
@@ -81,7 +83,7 @@ else {
 		</tr>
 	</table>
 	<!-- navigation -->
-	<table class="statBlockDoubleSection">
+	<table class="searchControlBar">
 		<tr>
 			<td align="left" width="40px"><?php if($getOffset > 0) echo("<input type=\"button\" value=\"<\" onClick=\"document.getElementById('page_start').value = " . max(($getOffset - $getLimit), 0) . "; this.form.submit();\">"); ?></td>
 			<td></td>

@@ -17,7 +17,7 @@ if($pkid == 0) {
 		$getLimit = sanitize($_GET['page_count']);
 	}
 	else {
-		$getLimit = 30;
+		$getLimit = 60;
 	}
 	if(isset($_GET['region'])) {
 		$getRegionKeyword = sanitize($_GET['region']);

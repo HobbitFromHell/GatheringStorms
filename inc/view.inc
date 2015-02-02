@@ -18,7 +18,74 @@ function cr_display($param_cr)
 	return $var_output;
 }
 
-function build_org($paramOrganizationID, $paramMember, $paramOrganizationList)
+function cr2xp($paramCR)
+{
+	$varDoubler = 1;
+	while ($paramCR > 2) {
+		$paramCR -= 2;
+		$varDoubler *= 2;
+	}
+	switch($paramCR) {
+		case -2: return 100;
+		case -1: return 135;
+		case 0: return 200;
+		case 1: return 400 * $varDoubler;
+		case 2: return 600 * $varDoubler;
+	}
+}
+
+function xp2cr($paramXP)
+{
+	$varCR = 0;
+	if($paramXP < 135) {
+		return -2;
+	}
+	if($paramXP < 200) {
+		return -1;
+	}
+	while($paramXP >= 800) {
+		$varCR += 2;
+		$paramXP /= 2;
+	}
+	if($paramXP >= 600) {
+		return $varCR + 2;
+	}
+	if($paramXP >= 400) {
+		return $varCR + 1;
+	}
+	return $varCR;
+}
+
+function cr2gp($paramCR)
+{
+	switch($paramCR) {
+		case -2: return 190;
+		case -1: return 260;
+		case 0: return 390;
+		case 1: return 780;
+		case 2: return 1650;
+		case 3: return 2400;
+		case 4: return 3450;
+		case 5: return 4650;
+		case 6: return 6000;
+		case 7: return 7800;
+		case 8: return 10050;
+		case 9: return 12750;
+		case 10: return 16350;
+		case 11: return 21000;
+		case 12: return 27000;
+		case 13: return 34800;
+		case 14: return 45000;
+		case 15: return 58500;
+		case 16: return 75000;
+		case 17: return 96000;
+		case 18: return 123000;
+		case 19: return 159000;
+	}
+	return 0;
+}
+
+function buildOrganization($paramOrganizationID, $paramMember, $paramOrganizationList)
 {
 	global $pkid;
 
@@ -35,6 +102,7 @@ function build_org($paramOrganizationID, $paramMember, $paramOrganizationList)
 	echo("{$paramOrganizationList[organization][$paramOrganizationID][members][$paramMember][title]}<br>");
 	echo("{$paramOrganizationList[organization][$paramOrganizationID][members][$paramMember][name]}<br>");
 	$var_cr = cr_display($paramOrganizationList[organization][$paramOrganizationID][members][$paramMember][cr]);
+	$varTotalXP += cr2xp($paramOrganizationList[organization][$paramOrganizationID][members][$paramMember][cr]);
 	echo("CR {$var_cr}");
 	if($pkid != $paramMember) {
 		echo("</a>");
@@ -44,7 +112,7 @@ function build_org($paramOrganizationID, $paramMember, $paramOrganizationList)
 	// search for followers
 	for($i = 0; $i < count($paramOrganizationList[organization][$paramOrganizationID][master][$paramMember]); $i++) {
 		echo("<td class=\"orgTD\">");
-		build_org($paramOrganizationID, $paramOrganizationList[organization][$paramOrganizationID][master][$paramMember][$i], $paramOrganizationList);
+		$varTotalXP += buildOrganization($paramOrganizationID, $paramOrganizationList[organization][$paramOrganizationID][master][$paramMember][$i], $paramOrganizationList);
 		echo("</td>");
 	}
 
@@ -65,6 +133,8 @@ function build_org($paramOrganizationID, $paramMember, $paramOrganizationList)
 	}
 
 	echo("</tr></table>");
+
+	return $varTotalXP;
 }
 
 function buildCharList($paramCharList) // array of objects with id, name, optional alignment, gender, race and class

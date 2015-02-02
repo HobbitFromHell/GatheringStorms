@@ -74,10 +74,10 @@ else {
 	<!-- list -->
 	<table class="statBlockDoubleWide statBlockSpacer">
 		<tr>
-			<td class="statBlockDetail">
+			<td class="statBlockSingleWide">
 <?php if($view->locationListLeft[0]) echo(buildLocList($view->locationListLeft));?>
 			</td>
-			<td class="statBlockDetail">
+			<td class="statBlockSingleWide">
 <?php if($view->locationListRight[0]) echo(buildLocList($view->locationListRight));?>
 			</td>
 		</tr>

@@ -20,7 +20,7 @@ $output->br();
 $output->add("melee", $view->characterTreasure[melee], 0, "<b>Melee Weapon</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "70"), 
-		array("repair", 0,  "", "60", 0, array("Good", "Worn", "Damaged", "Broken")), 
+		array("repair", 0,  "", "60", 0, array("Good", "Worn", "Broken")), 
 		array("is_equipped", 0, "", "60", "Melee", array("Melee", "Off-Hand", "Ranged", "No")), 
 		array("is_deleted", 0, 0, 0)
 	)
@@ -31,7 +31,7 @@ $output->addEdit("<br>");
 $output->add("offhand", $view->characterTreasure[offhand], 0, "<b>Off-Hand Weapon</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "70"), 
-		array("repair", 0, "", "60", 0, array("Good", "Worn", "Damaged", "Broken")), 
+		array("repair", 0, "", "60", 0, array("Good", "Worn", "Broken")), 
 		array("is_equipped", 0, "", "60", "Off-Hand", array("Melee", "Off-Hand", "Ranged", "No")), 
 		array("is_deleted", 0, 0, 0)
 	)
@@ -42,7 +42,7 @@ $output->addEdit("<br>");
 $output->add("ranged", $view->characterTreasure[ranged], 0, "<b>Ranged Weapon</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "70"), 
-		array("repair", 0, "", "60", 0, array("Good", "Worn", "Damaged", "Broken")), 
+		array("repair", 0, "", "60", 0, array("Good", "Worn", "Broken")), 
 		array("is_equipped", 0, "", "60", "Ranged", array("Melee", "Off-Hand", "Ranged", "No")), 
 		array("is_deleted", 0, 0, 0)
 	)
@@ -53,7 +53,7 @@ $output->addEdit("<br>");
 $output->add("armour", $view->characterTreasure[armour], 0, "<b>Armour</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "70"), 
-		array("repair", 0, "", "60", 0, array("Good", "Worn", "Damaged", "Broken")), 
+		array("repair", 0, "", "60", 0, array("Good", "Worn", "Broken")), 
 		array("is_equipped", 0, "", "60", "Armour", array("Armour", "No")), 
 		array("is_deleted", 0, 0, 0)
 	)
@@ -64,7 +64,7 @@ $output->addEdit("<br>");
 $output->add("shield", $view->characterTreasure[shield], 0, "<b>Shield</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "70"), 
-		array("repair", 0, "", "60", 0, array("Good", "Worn", "Damaged", "Broken")), 
+		array("repair", 0, "", "60", 0, array("Good", "Worn", "Broken")), 
 		array("is_equipped", 0, "", "60", "Armour", array("Armour", "Off-Hand", "No")), 
 		array("is_deleted", 0, 0, 0)
 	)
@@ -75,7 +75,7 @@ $output->addEdit("<br>");
 $output->add("othercombat", $view->characterTreasure[othercombat], 0, "<b>Combat Gear</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "70"), 
-		array("repair", 0, "", "60", 0, array("Good", "Worn", "Damaged", "Broken")), 
+		array("repair", 0, "", "60", 0, array("Good", "Worn", "Broken")), 
 		array("is_equipped", 0, "", "60", "Yes", array("Yes", "No")), 
 		array("is_deleted", 0, 0, 0)
 	)
@@ -86,8 +86,8 @@ $output->addEdit("<br>");
 $output->add("other", $view->characterTreasure[other], "Other Gear", "<b>Other Gear</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "70"), 
-		array("repair", 0, "", "60", 0, array("Good", "Worn", "Damaged", "Broken")), 
-		array("is_equipped", 0, "", "60", "No", array("Yes", "No")), 
+		array("repair", 0, "", "60", 0, array("Good", "Worn", "Broken")), 
+		array("is_equipped", 0, "", "60", "No", array("Melee", "Off-Hand", "Ranged", "Armour", "Yes", "No")), 
 		array("is_deleted", 0, 0, 0)
 	)
 );

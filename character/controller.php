@@ -316,6 +316,7 @@ if($pkid == 0) {
 			armour_build: function ()
 			{
 				console.log("function armour_build()")
+
 				charSheet.armour_desc = ""
 				if(charSheet.getValue("shield")) {
 					charSheet.armour_desc += ", "
@@ -342,6 +343,7 @@ if($pkid == 0) {
 
 				$('#calcArmour').html(charSheet.getValue("armour_desc").substr(2))
 				charSheet.ac_build()
+
 				console.log(" ... CHECK")
 			},
 
@@ -435,7 +437,8 @@ if($pkid == 0) {
 			// build speed
 			speed_build: function ()
 			{
-				console.log("speed_build ... ")
+				console.log("function speed_build()")
+
 				charSheet.ac_max_dex = charSheet.load_max_dex = 45
 				tmpSpeed = 1 * charSheet.getValue("baseSpeed") + 1 * charSheet.getValue("base_speed_traits")
 				temp = 0 // track whether to use base speed or restricted
@@ -488,6 +491,7 @@ if($pkid == 0) {
 					charSheet.spd = tmpSpeed
 				}
 				$('#calcSpd').text(charSheet.getValue("spd") + " ft." + charSheet.getValue("movement"))
+
 				console.log(" ... CHECK")
 			},
 
@@ -1957,17 +1961,18 @@ if($pkid == 0) {
 			// set default values for skills
 			charSheet.total_sp_used = 0
 			charSheet.lp_skills = 0
-			charSheet.perception = 10 + 1 * charSheet.bonus(charSheet.getValue("wis")) + 1 * charSheet.getValue("skill_trait_bonus.46") + 1 * charSheet.getValue("skill_feat_bonus.46") + 1 * charSheet.getValue("skill_doubling_bonus.46")
+			charSheet.perception = 10 + 1 * charSheet.bonus(charSheet.getValue("wis")) + charSheet.getNumber("skill_trait_bonus.46") + charSheet.getNumber("skill_feat_bonus.46") + charSheet.getNumber("skill_doubling_bonus.46")
 
 			// loop through each skill
 			if(charSheet.getValue("skills.0.name")) {
 				for(i = 0; i < charSheet.skills.length; i++) {
-					charSheet.total_sp_used += 1 * charSheet.getValue("skills." + i + ".rank")
-					charSheet.skills[i].total = 10 + 1 * charSheet.getValue("skills." + i +".rank") + charSheet.bonus(charSheet.getValue(charSheet.getValue("skills." + i + ".ability").toLowerCase())) + 1 * charSheet.getValue("skill_trait_bonus." + charSheet.getValue("skills." + i + ".skill_id")) + 1 * charSheet.getValue("skill_feat_bonus." + charSheet.getValue("skills." + i + ".skill_id")) + 1 * charSheet.getValue("skill_doubling_bonus." + charSheet.getValue("skills." + i + ".skill_id"))
+					var tmpAbility = charSheet.getValue("skills." + i + ".ability").toLowerCase();
+					charSheet.total_sp_used += charSheet.getNumber("skills." + i + ".rank")
+					charSheet.skills[i].total = 10 + charSheet.getNumber("skills." + i +".rank") + charSheet.bonus(charSheet.getValue(tmpAbility)) + charSheet.getNumber("skill_trait_bonus." + charSheet.getValue("skills." + i + ".skill_id")) + charSheet.getNumber("skill_feat_bonus." + charSheet.getValue("skills." + i + ".skill_id")) + charSheet.getNumber("skill_doubling_bonus." + charSheet.getValue("skills." + i + ".skill_id"))
 
 					// feat bonuses double at 10 ranks
 					if(charSheet.getValue("skills." + i + ".rank") > 9) {
-						charSheet.skills[i].total += 1 * charSheet.getValue("skill_doubling_bonus." + charSheet.getValue("skills." + i + ".skill_id"))
+						charSheet.skills[i].total += charSheet.getNumber("skill_doubling_bonus." + charSheet.getNumber("skills." + i + ".skill_id"))
 					}
 
 					// +3 to trained class skills
@@ -2011,6 +2016,19 @@ if($pkid == 0) {
 						charSheet.lp_skills += 1 * charSheet.getValue("skills." + i + ".rank")
 					}
 
+					// armour check penalty from armour and encumbrance applies to str and dex skills
+					if(tmpAbility == "str" || tmpAbility == "dex") {
+						// calculate skill check penalty due to encumbrance
+						var tmpLoadCheckPenalty = charSheet.bonus(charSheet.getValue(tmpAbility)) - charSheet.bonus(charSheet.getValue(tmpAbility) - charSheet.getNumber("loadType"))
+						// apply whichever penalty is greater
+						if(tmpLoadCheckPenalty > charSheet.getValue("armour.armour_penalty")) {
+							charSheet.skills[i].total -= tmpLoadCheckPenalty
+						}
+						else {
+							charSheet.skills[i].total -= charSheet.getValue("armour.armour_penalty")
+						}
+					}
+	
 					// update read/edit sections
 					$('#spantotal' + charSheet.getValue("skills." + i + ".id")).text(charSheet.getValue("skills." + i + ".total"))
 					//$('#total' + charSheet.getValue("skills." + i + ".id")).value = charSheet.getValue("skills." + i + ".total")
@@ -3466,7 +3484,8 @@ if($pkid == 0) {
 		// calculate treasure section
 		function calcTreasure()
  		{
-				console.log("calcTreasure ... ")
+			console.log("function calcTreasure()")
+
 			// gold
 			var tmpMaxValue
 			charSheet.total_value = $('#total_value').val()
@@ -3521,9 +3540,14 @@ if($pkid == 0) {
 			}
 
 			$('#calcLoad').text("/ " + Math.floor(tmpCarryingCap) + " lbs. (" + tmpLoad + ")")
+
+
+			// recalculate sections
+			calcSkills()
 			calcOffense()
 			calcDefense()
-				console.log(" ... CHECK")
+
+			console.log(" ... CHECK")
 		}
 
 		// onload

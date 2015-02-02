@@ -88,10 +88,15 @@ while($j) {
 	if($j[quality][0] == " ") {
 		$j[quality] = substr($j[quality], 1);
 	}
-	preg_match("/^\D?(\d+)/", $j[quality], $matches); // detect number in first or second position, indicating magical bonus
-	if($matches[1]) {
-		$tmpBonus = $matches[1];
-		$j[quality] = "+" . $j[quality];
+	preg_match("/^(\D?)(\d+)/", $j[quality], $matches); // detect number in first or second position, indicating magical bonus
+	if($matches[2]) {
+		$tmpBonus = $matches[2];
+		if($matches[1] == " ") { // if + sign is missing, replace it
+			$j[quality][0] = "+";
+		}
+		if($matches[1] == "") { // if there is nother preceding the number, add a + sign
+			$j[quality] = "+" . $j[quality];
+		}
 		$j[damage_mod] = $tmpBonus;
 		$j[to_hit_mod] = $tmpBonus;
 		$j[armour_hp] += $tmpBonus * 5;
@@ -103,6 +108,19 @@ while($j) {
 	}
 
 	$j[quality_format] = $j[quality];
+
+	if($j[repair] == "Worn") { // worn equipment
+		$j[cost] *= 0.90;
+	}
+	if($j[repair] == "Broken") { // broken weapon
+		$j[cost] *= 0.75;
+		$j[damage_mod] -= 2;
+		$j[to_hit_mod] -= 2;
+		$j[melee_critical] = "x2";
+		$j[ranged_critical] = "x2";
+		$j[dc] = floor($j[dc] / 2);
+		$j[armour_penalty] *= 2;
+	}
 
 	if(stripos($j[quality], "mwk") !== FALSE) { // masterwork item
 		$tmpAddedCost += 20000;

@@ -212,7 +212,7 @@ if($pkid == 0) {
 					charSheet.total_fp += 1 * charSheet.getValue("fp_features")
 					charSheet.fp_desc  += " +" + charSheet.getValue("fp_features") + " class features"
 				}
-				charSheet.fp_desc  = "(" + charSheet.getValue("total_fp_used") + " / " + charSheet.getValue("total_fp") + ") " + charSheet.getValue("fp_desc")
+				charSheet.fp_desc  = "(" + charSheet.getNumber("total_fp_used") + " / " + charSheet.getNumber("total_fp") + ") " + charSheet.getValue("fp_desc")
 				charSheet.fp_desc += ")"
 				$('#calcFPDesc').text(charSheet.getValue("fp_desc"))
 				console.log(" ... CHECK")
@@ -1292,11 +1292,12 @@ if($pkid == 0) {
 		// calculate feats subsection
 		function calcFeats()
 		{
-				console.log("calcFeats ... ")
+			console.log("function calcFeats()")
+
 			// set default values for feats
 			charSheet.spd_bonus_lgt_l_lgt_a = 0
 			charSheet.carrying_cap_feats = 1
-			charSheet.total_fp_used = charSheet.getValue("feats").length
+			charSheet.total_fp_used = 0
 			charSheet.hp_feats = charSheet.init_feats = 0
 			charSheet.ac_dodge_feats = charSheet.ac_luck_feats = charSheet.ac_insight_feats = 0
 			charSheet.fort_feats = charSheet.ref_feats = charSheet.will_feats = 0
@@ -1324,6 +1325,7 @@ if($pkid == 0) {
 			// loop through each feat
 			for(i = 0; i < charSheet.getValue("feats").length; i++) {
 				if(charSheet.getValue("feats." + i)) {
+					charSheet.total_fp_used++
 					var featDetail = charSheet.getValue("feats." + i + ".detail")
 					switch(charSheet.getValue("feats." + i + ".name")) {
 						// regional
@@ -1950,7 +1952,8 @@ if($pkid == 0) {
 			calcSkills()
 			calcDefense()
 			calcOffense()
-				console.log(" ... CHECK")
+
+			console.log(" ... CHECK")
 		}
 
 		// calculate skills subsection
@@ -2045,19 +2048,25 @@ if($pkid == 0) {
 		// calculate languages subsection
 		function calcLanguages()
 		{
-				console.log("calcLanguages ... ")
+			console.log("function calcLanguages()")
+
 			// set default values for languages
-			charSheet.total_lp_used = charSheet.getValue("languages").length
-			tmpIlliterateBonus = 0
+			charSheet.total_lp_used = 0
+			var tmpIlliterateBonus = 0
+
 			for(i = 0; i < charSheet.getValue("languages").length; i++) {
-				if (charSheet.getValue("languages." + i + ".name") == "Illiterate") {
-					charSheet.total_lp_used--
-					tmpIlliterateBonus = 1
+				if(charSheet.getValue("languages." + i + ".name")) {
+					if (charSheet.getValue("languages." + i + ".name") == "Illiterate") {
+						tmpIlliterateBonus = 1
+					}
+					else {
+						charSheet.total_lp_used++
+					}
 				}
 			}
 
 			// TO DO: add racial trait for racial language
-			charSheet.lp_desc  = "(" + charSheet.getValue("total_lp_used") + " / " + (2 + tmpIlliterateBonus + charSheet.bonus(charSheet.getValue("int")) + 1 * charSheet.getValue("lp_skills") + 1 * charSheet.getValue("lp_traits") + 1 * charSheet.getValue("lp_features")) + ") "
+			charSheet.lp_desc  = "(" + charSheet.getNumber("total_lp_used") + " / " + (2 + tmpIlliterateBonus + charSheet.bonus(charSheet.getNumber("int")) + charSheet.getNumber("lp_skills") + charSheet.getNumber("lp_traits") + charSheet.getNumber("lp_features")) + ") "
 			charSheet.lp_desc += "(2"
 			if(tmpIlliterateBonus) {
 				charSheet.lp_desc += " + 1 illiterate allowance"
@@ -2077,7 +2086,8 @@ if($pkid == 0) {
 			charSheet.lp_desc += ")"
 
 			$('#calcLPDesc').text(charSheet.getValue("lp_desc"))
-				console.log(" ... CHECK")
+
+			console.log(" ... CHECK")
 		}
 
 		// calculate special abilities section

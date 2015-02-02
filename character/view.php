@@ -93,10 +93,10 @@ else {
 	<!-- list -->
 	<table class="statBlockDoubleWide statBlockSpacer">
 		<tr>
-			<td class="statBlockDetail">
+			<td class="statBlockSingleWide">
 <?php if($view->characterListLeft[0]) echo(buildCharList($view->characterListLeft));?>
 			</td>
-			<td class="statBlockDetail">
+			<td class="statBlockSingleWide">
 <?php if($view->characterListRight[0]) echo(buildCharList($view->characterListRight));?>
 			</td>
 		</tr>

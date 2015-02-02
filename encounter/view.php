@@ -65,7 +65,11 @@ else {
 		</tr>
 	</table>
 	<!-- list -->
-	<div id="statBlockDoubleSection"><?php if($view->encounterList[0]) echo(buildEncList($view->encounterList));?></div>
+	<table class="statBlockDoubleWide statBlockSpacer">
+		<tr>
+			<td><?php if($view->encounterList[0]) echo(buildEncList($view->encounterList));?></td>
+		</tr>
+	</table>
 	<!-- navigation -->
 	<table class="searchControlBar">
 		<tr>

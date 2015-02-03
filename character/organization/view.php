@@ -26,14 +26,18 @@ unset($view->characterOrganization[organization]['list']);
 
 // display all members of each organization
 for($i = 0; $i < count($view->characterOrganization[organization]); $i++) {
-	echo("<div><b>{$view->characterOrganization[organization][$i][name]}</b><br>");
+	echo("<div>");
 	echo("<table class=\"orgTable\"><tr class=\"orgTR\">");
+	$varTotalXP = 0;
 	for($j = 0; $j < count($view->characterOrganization[organization][$i][master][0]); $j++) { // repeat for each master (master_ID = 0)
 		echo("<td class=\"orgTD\">");
-		build_org($i, $view->characterOrganization[organization][$i][master][0][$j], $view->characterOrganization);
+		$varTotalXP += buildOrganization($i, $view->characterOrganization[organization][$i][master][0][$j], $view->characterOrganization);
 		echo("</td>");
 	}
-	echo("</tr></table></div>");
+	$varTotalCR = xp2cr($varTotalXP);
+	$varTotalGP = number_format(cr2gp(xp2cr($varTotalXP)));
+	$varTotalXP = number_format($varTotalXP);
+	echo("</tr><tr><div class=\"sup\"><b>{$view->characterOrganization[organization][$i][name]}</b> (Total CR: {$varTotalCR}, Total XP: {$varTotalXP}, Total GP: {$varTotalGP})</div></tr></table></div>");
 }
 
 ?>

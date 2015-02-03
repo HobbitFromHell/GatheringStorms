@@ -39,6 +39,6 @@ $output->br();
 
 echo $output->dump(1);
 
-echo drawHexMap($xco, $yco, 7, $view->locationMap[location]);
+echo drawHexMap($xco, $yco, 8, $view->locationMap[location]);
 
 ?>

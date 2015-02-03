@@ -14,7 +14,7 @@ if(strpos($pkid, "x") < 1) {
 // insert
 // //////
 
-post_data("t_locations", "id", "id", Array("terrain", "growth", "image", "roads", "trails", "rivers"));
+post_data("t_locations", "id", "id", Array("terrain", "growth", "image", "roads", "trails", "rivers", "regions_id"));
 
 
 // //////
@@ -135,7 +135,7 @@ while($j) {
 // ////////////////////////////
 
 echo "<script>\n";
-echo "buildSection('Organization')\n";
+echo "buildSection('Localmap')\n";
 echo "</script>\n";
 
 ?>

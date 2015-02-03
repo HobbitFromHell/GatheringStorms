@@ -70,7 +70,7 @@ $view->locationMap[map][growth] = $view->getEnum("t_locations", "growth", $view-
 $xloc = stripos($pkid, "x");
 $xco = substr($pkid, 0, $xloc);
 $yco = substr($pkid, $xloc + 1);
-$varHexSize = 7;
+$varHexSize = 8;
 $tmpAllCo = "";
 
 // build location list

@@ -27,7 +27,6 @@ if (isset($_POST[id])) {
 	");
 }
 
-
 // //////
 // select
 // //////
@@ -64,6 +63,7 @@ $j = DataConnector::selectQuery("
 	        l.`terrain` AS `terrain`,
 	        l.`growth`  AS `growth`,
 	        l.`roads`   AS `roads`,
+	        l.`trails`  AS `trails`,
 	        l.`rivers`  AS `rivers`
 	   FROM t_locations l
 	  WHERE l.`id` IN ({$varCoordinates})

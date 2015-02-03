@@ -70,7 +70,8 @@ $view->encounterScene[trigger]['list'][1][name] = "";
 $varCurrentOption = 0;
 while($j) {
 	$view->encounterScene[trigger]['list'][] = $j;
-	if($j[name] == $view->encounterScene[scene]) {
+	// mark the triggering encounter
+	if($j[id] == $view->encounterScene[trigger_encounter_id]) {
 		$varCurrentOption = 1;
 	}
 	$j = DataConnector::selectQuery();

@@ -248,11 +248,11 @@ $js_array = json_encode($view->class_level);
 echo "charSheet.class_level = {$js_array}\n";
 $js_array = json_encode($view->characterMain[domains]);
 echo "charSheet.domain_powers = {$js_array}\n";
-echo "buildSection('Treasure')\n";
+echo "buildSection('Specialabilities')\n";
 $view->characterMain[stat_block] = str_replace("\r", "", $view->characterMain[stat_block]);
 $view->characterMain[stat_block] = str_replace("\n", "<br>", $view->characterMain[stat_block]);
 $view->characterMain[stat_block] = str_replace("\"", "''", $view->characterMain[stat_block]);
-echo "document.getElementById('statblockSection').innerHTML = \"{$view->characterMain[stat_block]}\"\n";
+echo "$('#statblockSection').html(\"{$view->characterMain[stat_block]}\")\n";
 echo "</script>\n";
 
 ?>

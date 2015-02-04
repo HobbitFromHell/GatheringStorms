@@ -21,6 +21,7 @@ post_data("t_characters_organizations", "id", "character_id", Array(Array("organ
 // //////
 
 $view = new DataCollector;
+
 $view->characterOrganization[organization][] = DataConnector::selectQuery("
 	 SELECT co.`id`              AS `id`,
 	        co.`organization_id` AS `org_id`,
@@ -54,10 +55,14 @@ if($view->characterOrganization[organization][0]) {
 			    AND co.`is_deleted` != 'Yes'
 			  ORDER BY pc.`cr` DESC
 		");
+		$view->characterOrganization['list'][] = $view->characterOrganization[organization][$i];
 		while($j) {
-			$view->characterOrganization[organization][$i][members][$j[id]] = $j; // members list, indexed by character ID
-			$view->characterOrganization[organization][$i][master][$j[master_id]][] = $j[id]; // list of followers' character ID, indexed by master ID
-			if($view->characterOrganization[organization][$i][master_id] == $j[id]) { // if the current record has followers
+			// add the record to a members list, indexed by character ID
+			$view->characterOrganization[organization][$i][members][$j[id]] = $j;
+			// add the record to a list of followers' character ID, indexed by master ID (0 = no master)
+			$view->characterOrganization[organization][$i][master][$j[master_id]][] = $j[id];
+			// snag the master name from the main array
+			if($view->characterOrganization[organization][$i][master_id] == $j[id]) {
 				$view->characterOrganization[organization][$i][master][name] = $j[name];
 			}
 			$j = DataConnector::selectQuery();
@@ -76,9 +81,19 @@ $j = DataConnector::selectQuery("
 	  ORDER BY o.`name`
 ");
 while($j) {
-		$view->characterOrganization[organization]['list'][] = $j;
-		$j = DataConnector::selectQuery();
+	$view->characterOrganization[organization]['list'][] = $j;
+	$j = DataConnector::selectQuery();
 }
+
+// if a membership organization is not on the current list of local orgs, add it
+foreach($view->characterOrganization[organization] as $varOrg) {
+	if($varOrg[org_id] and !array_key_exists($varOrg[org_id], $view->characterOrganization[organization]['list'])) {
+		$k[id] = $varOrg[org_id];
+		$k[name] = $varOrg[name];
+		$view->characterOrganization[organization]['list'][] = $k;
+	}
+}
+
 
 // ////////////////////////////
 // communicate with parent page

@@ -38,7 +38,7 @@ if($view->characterOrganization[organization][0]) {
 		$varTotalCR = xp2cr($varTotalXP);
 		$varTotalGP = number_format(cr2gp(xp2cr($varTotalXP)));
 		$varTotalXP = number_format($varTotalXP);
-		echo("</tr><tr><div class=\"sup\"><b>{$view->characterOrganization[organization][$i][name]}</b> (Total CR: {$varTotalCR}, Total XP: {$varTotalXP}, Total GP: {$varTotalGP})</div></tr></table>");
+		echo("</tr><tr><div class=\"sup\"><b>{$view->characterOrganization[organization][$i][name]} &nbsp; CR {$varTotalCR}</b> (Total XP: {$varTotalXP}, Total GP: {$varTotalGP})</div></tr></table>");
 	}
 }
 echo("&nbsp;</div>");

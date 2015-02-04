@@ -23,7 +23,8 @@ post_data("t_characters_character_classes_class_features", "id", "character_id",
 // ////////////////////////////
 
 echo "<script>\n";
-echo "buildSection('Feats', 'total_level=' + charSheet.total_level + '&race=' + charSheet.race + '&total_bab=' + charSheet.total_bab + '&str=' + charSheet.str + '&dex=' + charSheet.dex + '&con=' + charSheet.con + '&int=' + charSheet.int + '&wis=' + charSheet.wis + '&cha=' + charSheet.cha)\n";
+echo "calcRacialtraits()\n";
+echo "buildSection('Treasure', 'size=' + charSheet.size)\n";
 echo "</script>\n";
 
 ?>

@@ -2090,67 +2090,9 @@ if($pkid == 0) {
 			console.log(" ... CHECK")
 		}
 
-		// calculate special abilities section
-		function calcSpecialabilities()
+		// calculate racial traits (part of special abilities section)
+		function calcRacialtraits()
 		{
-				console.log("calcSpecialabilities ... ")
-			// set default values for racial traits
-			charSheet.size = "Medium"
-			charSheet.baseSpeed = 30
-			charSheet.skill_bard_know = 0
-			charSheet.base_speed_traits = 0
-			charSheet.movement = ""
-			charSheet.noSpeedRestriction = charSheet.spd_armour_training = 0
-			charSheet.fort_traits = charSheet.ref_traits = charSheet.will_traits = 0
-			charSheet.senses_traits = ""
-			charSheet.sa_traits = charSheet.spell_like_traits = ""
-			charSheet.save_traits = charSheet.sd_traits = charSheet.immune_traits = charSheet.resist_traits = ""
-			charSheet.sp_traits = charSheet.fp_traits = charSheet.lp_traits = 0
-			charSheet.outputRacialTraits = charSheet.outputSkillOptions = ""
-			charSheet.fp_features = charSheet.lp_features = 0
-			charSheet.base_spd_bonus_med_l_med_a = 0
-			charSheet.spd_bonus_lgt_l_no_a = 0
-			charSheet.ac_uncanny_dodge = charSheet.sd_trap_sense = 0
-			charSheet.ac_damage_reduction = charSheet.ac_damage_reduction_cold_iron = charSheet.ac_damage_reduction_chaotic = charSheet.ac_damage_reduction_evil = charSheet.ac_damage_reduction_lethal = 0
-			charSheet.ac_bonus_wis = charSheet.ac_bonus_monk = charSheet.ac_evasion = 0
-			charSheet.ac_natural_armour = 0
-			charSheet.sa_rage = charSheet.sa_rp = 0
-			charSheet.sa_unarmed = charSheet.sa_flurry = charSheet.sd_maneuver_training = charSheet.sa_quivering_palm = 0
-			charSheet.sa_kp = 0
-			charSheet.sq_features = charSheet.sd_features = charSheet.sa_features = ""
-			charSheet.sa_rage_powers = charSheet.outputRagePowers = ""
-			charSheet.sa_pp = 0
-			charSheet.sa_jack_of_all_trades = charSheet.sa_slow_fall = 0
-			charSheet.sa_bard_perf = charSheet.sa_versatile_perf = charSheet.outputVersatilePerf = charSheet.outputAnimalCompanion = ""
-			charSheet.sa_channel = charSheet.outputChannelEnergy = charSheet.outputDomains = ""
-			charSheet.sa_domain_powers = charSheet.sa_animal_companion = ""
-			charSheet.sa_domains = []
-			charSheet.sa_quarry = 0
-			charSheet.sa_weapon_group = {}
-			charSheet.outputWeaponGroup = charSheet.sa_weapon_mastery = charSheet.outputWeaponMastery = ""
-			charSheet.sa_two_weapon = 0
-			charSheet.sq_mercies = charSheet.outputMercies = charSheet.outputDivineBond = ""
-			charSheet.sa_favoured_enemy = {}
-			charSheet.sq_favoured_terrain = {}
-			charSheet.outputFavouredEnemy = charSheet.outputFavouredTerrain = ""
-			charSheet.outputCombatStyle = charSheet.outputHuntersBond = ""
-			charSheet.sq_rogue_talents = charSheet.outputRogueTalents = ""
-			charSheet.sa_lohp = 0
-			charSheet.sa_bloodline = charSheet.outputBloodline = charSheet.sa_bloodline_notes = charSheet.outputBloodlinePowers = charSheet.outputBloodlineClassSkill = ""
-			charSheet.added_class_skills = []
-			charSheet.outputArcaneBond = charSheet.outputArcaneSchool = charSheet.outputOppositionSchool = ""
-			charSheet.outputSchoolPower1 = charSheet.outputSchoolPower2 = charSheet.outputSchoolPower3 = ""
-			charSheet.sa_arcane_school = charSheet.sa_arcane_school_notes = ""
-			charSheet.sa_opposition_schools = []
-			charSheet.outputNewArcana = charSheet.sa_new_arcana = charSheet.outputSchoolPower = charSheet.sa_school_power = ""
-			charSheet.outputDragonType = charSheet.sa_dragon_type = charSheet.outputElementType = charSheet.sa_element_type = ""
-			for(i = 0; i < 150; i++) {
-				charSheet.skill_trait_bonus[i] = 0
-				if(charSheet.getValue("skill_list." +i)) {
-					charSheet.outputSkillOptions += "<option value=\"" + i + "\">" + charSheet.getValue("skill_list." + i) + "</option>"
-				}
-			}
-
 			// loop through each racial trait
 			for(i = 0, j = ""; i < charSheet.getValue("racial_traits").length; i++) {
 				if(charSheet.getValue("racial_traits." + i)) {
@@ -2159,6 +2101,7 @@ if($pkid == 0) {
 					// size
 						case "Small": {
 							charSheet.size = "Small"
+							charSheet.skill_trait_bonus[91] += 4
 							break
 						}
 					// senses
@@ -2259,10 +2202,6 @@ if($pkid == 0) {
 							break
 						}
 						case "Greed": break;
-						case "Sneaky": {
-							charSheet.skill_trait_bonus[91] += 4
-							break
-						}
 						case "Stonecunning": break;
 						case "Keen Senses": { // +2 Perception
 							charSheet.skill_trait_bonus[46] += 2
@@ -2313,6 +2252,71 @@ if($pkid == 0) {
 			if(charSheet.outputRacialTraits) {
 				$('#editRacialTraits').html(charSheet.outputRacialTraits)
 			}
+		}
+
+		// calculate special abilities section
+		function calcSpecialabilities()
+		{
+			console.log("function calcSpecialabilities()")
+
+			// set default values for racial traits
+			charSheet.size = "Medium"
+			charSheet.baseSpeed = 30
+			charSheet.skill_bard_know = 0
+			charSheet.base_speed_traits = 0
+			charSheet.movement = ""
+			charSheet.noSpeedRestriction = charSheet.spd_armour_training = 0
+			charSheet.fort_traits = charSheet.ref_traits = charSheet.will_traits = 0
+			charSheet.senses_traits = ""
+			charSheet.sa_traits = charSheet.spell_like_traits = ""
+			charSheet.save_traits = charSheet.sd_traits = charSheet.immune_traits = charSheet.resist_traits = ""
+			charSheet.sp_traits = charSheet.fp_traits = charSheet.lp_traits = 0
+			charSheet.outputRacialTraits = charSheet.outputSkillOptions = ""
+			charSheet.fp_features = charSheet.lp_features = 0
+			charSheet.base_spd_bonus_med_l_med_a = 0
+			charSheet.spd_bonus_lgt_l_no_a = 0
+			charSheet.ac_uncanny_dodge = charSheet.sd_trap_sense = 0
+			charSheet.ac_damage_reduction = charSheet.ac_damage_reduction_cold_iron = charSheet.ac_damage_reduction_chaotic = charSheet.ac_damage_reduction_evil = charSheet.ac_damage_reduction_lethal = 0
+			charSheet.ac_bonus_wis = charSheet.ac_bonus_monk = charSheet.ac_evasion = 0
+			charSheet.ac_natural_armour = 0
+			charSheet.sa_rage = charSheet.sa_rp = 0
+			charSheet.sa_unarmed = charSheet.sa_flurry = charSheet.sd_maneuver_training = charSheet.sa_quivering_palm = 0
+			charSheet.sa_kp = 0
+			charSheet.sq_features = charSheet.sd_features = charSheet.sa_features = ""
+			charSheet.sa_rage_powers = charSheet.outputRagePowers = ""
+			charSheet.sa_pp = 0
+			charSheet.sa_jack_of_all_trades = charSheet.sa_slow_fall = 0
+			charSheet.sa_bard_perf = charSheet.sa_versatile_perf = charSheet.outputVersatilePerf = charSheet.outputAnimalCompanion = ""
+			charSheet.sa_channel = charSheet.outputChannelEnergy = charSheet.outputDomains = ""
+			charSheet.sa_domain_powers = charSheet.sa_animal_companion = ""
+			charSheet.sa_domains = []
+			charSheet.sa_quarry = 0
+			charSheet.sa_weapon_group = {}
+			charSheet.outputWeaponGroup = charSheet.sa_weapon_mastery = charSheet.outputWeaponMastery = ""
+			charSheet.sa_two_weapon = 0
+			charSheet.sq_mercies = charSheet.outputMercies = charSheet.outputDivineBond = ""
+			charSheet.sa_favoured_enemy = {}
+			charSheet.sq_favoured_terrain = {}
+			charSheet.outputFavouredEnemy = charSheet.outputFavouredTerrain = ""
+			charSheet.outputCombatStyle = charSheet.outputHuntersBond = ""
+			charSheet.sq_rogue_talents = charSheet.outputRogueTalents = ""
+			charSheet.sa_lohp = 0
+			charSheet.sa_bloodline = charSheet.outputBloodline = charSheet.sa_bloodline_notes = charSheet.outputBloodlinePowers = charSheet.outputBloodlineClassSkill = ""
+			charSheet.added_class_skills = []
+			charSheet.outputArcaneBond = charSheet.outputArcaneSchool = charSheet.outputOppositionSchool = ""
+			charSheet.outputSchoolPower1 = charSheet.outputSchoolPower2 = charSheet.outputSchoolPower3 = ""
+			charSheet.sa_arcane_school = charSheet.sa_arcane_school_notes = ""
+			charSheet.sa_opposition_schools = []
+			charSheet.outputNewArcana = charSheet.sa_new_arcana = charSheet.outputSchoolPower = charSheet.sa_school_power = ""
+			charSheet.outputDragonType = charSheet.sa_dragon_type = charSheet.outputElementType = charSheet.sa_element_type = ""
+			for(i = 0; i < 150; i++) {
+				charSheet.skill_trait_bonus[i] = 0
+				if(charSheet.getValue("skill_list." +i)) {
+					charSheet.outputSkillOptions += "<option value=\"" + i + "\">" + charSheet.getValue("skill_list." + i) + "</option>"
+				}
+			}
+
+			calcRacialtraits()
 
 			// build spell options
 			if(charSheet.spell_list) {

@@ -9,6 +9,11 @@ if(!($pkid > 0 and $pkid < 65000)) {
 	return false;
 }
 
+$view = new DataCollector();
+
+// read post data required to customize equipment
+$view->characterTreasure[param][size] = sanitize($_POST[size]);
+
 
 // //////
 // insert
@@ -77,6 +82,7 @@ $j = DataConnector::selectQuery("
 	  WHERE ce.`character_id` = {$pkid}
 	    AND ce.`is_deleted` != 'Yes'
 ");
+
 while($j) {
 	$tmpAddedCost = 0;
 	$tmpBonus = 0;
@@ -109,10 +115,25 @@ while($j) {
 
 	$j[quality_format] = $j[quality];
 
-	if($j[repair] == "Worn") { // worn equipment
+	// size of armour and weapons
+	if($j[armour_category] or $j[melee_category] or $j[ranged_category]) {
+		if($view->characterTreasure[param][size] == "Small") {
+			$j[cost] *= 1;
+			$j[weight] /= 2;
+			$j[armour_hp] = floor($j[armour_hp] / 2);
+		}
+		if($view->characterTreasure[param][size] == "Large") {
+			$j[cost] *= 2;
+			$j[weight] *= 2;
+			$j[armour_hp] *= 2;
+		}
+	}
+
+	// state of equipment repair
+	if($j[repair] == "Worn") {
 		$j[cost] *= 0.90;
 	}
-	if($j[repair] == "Broken") { // broken weapon
+	if($j[repair] == "Broken") {
 		$j[cost] *= 0.75;
 		$j[damage_mod] -= 2;
 		$j[to_hit_mod] -= 2;
@@ -521,7 +542,8 @@ $js_array = json_encode($view->characterTreasure[armour][1]);
 echo "charSheet.armour = {$js_array}\n";
 $js_array = json_encode($view->characterTreasure[shield][1]);
 echo "charSheet.shield = {$js_array}\n";
-echo "buildSection('Specialabilities')\n";
+//echo "buildSection('Specialabilities')\n";
+echo "buildSection('Feats', 'total_level=' + charSheet.total_level + '&race=' + charSheet.race + '&total_bab=' + charSheet.total_bab + '&str=' + charSheet.str + '&dex=' + charSheet.dex + '&con=' + charSheet.con + '&int=' + charSheet.int + '&wis=' + charSheet.wis + '&cha=' + charSheet.cha)\n";
 echo "</script>\n";
 
 ?>

@@ -5,6 +5,7 @@ $output = new BuildOutput("Treasure");
 
 // id and parameters
 $output->add("id", $pkid, 0, 0);
+$output->add("size", $view->characterTreasure[param][size], 0, 0);
 $output->add("total_value", $view->total_value, 0, 0);
 $output->add("total_weight", $view->total_weight, 0, 0);
 

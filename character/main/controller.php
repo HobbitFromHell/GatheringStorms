@@ -142,7 +142,11 @@ foreach($view->characterMain['class'] as $varClass) {
 		$view->total_will += 2;
 	}
 	if($varClass[class_id] != "COM") {
-		if(($varClass[class_id] == "ADP" or $varClass[class_id] == "ART" or $varClass[class_id] == "EXP" or $varClass[class_id] == "WAR") and $view->level_quality = -3) {
+		if(($varClass[class_id] == "ADP" or
+		    $varClass[class_id] == "ART" or 
+		    $varClass[class_id] == "EXP" or 
+		    $varClass[class_id] == "WAR") and
+		    $view->level_quality == -3) {
 			$view->level_quality = -2;
 		}
 		else {

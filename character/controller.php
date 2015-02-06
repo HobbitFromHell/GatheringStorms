@@ -153,7 +153,8 @@ if($pkid == 0) {
 			// build hp and description
 			hp_build: function ()
 			{
-				console.log("hp_build ... ")
+				console.log("function hp_build()")
+
 				charSheet.hp_desc  = "(" + charSheet.getValue("hp_desc_main")
 				charSheet.total_hp = 1 * charSheet.getValue("hp_main")
 				if(charSheet.getValue("hp_abilities")) {
@@ -167,13 +168,15 @@ if($pkid == 0) {
 				charSheet.hp_desc += ")"
 				$('#calcHP').text(charSheet.getValue("total_hp"))
 				$('#calcHPDesc').text(charSheet.getValue("hp_desc"))
+
 				console.log(" ... CHECK")
 			},
 
 			// build description of skills used and remaining
 			sp_build: function ()
 			{
-				console.log("sp_build ... ")
+				console.log("function sp_build()")
+
 				charSheet.total_sp = 1 * charSheet.getValue("sp_main")
 				charSheet.sp_desc  = "(" + charSheet.getValue("sp_main")
 				if(charSheet.getValue("sp_bonus") != 0) {
@@ -195,13 +198,15 @@ if($pkid == 0) {
 				charSheet.sp_desc  = "(" + charSheet.getNumber("total_sp_used") + " / " + charSheet.getValue("total_sp") + ") " + charSheet.getValue("sp_desc")
 				charSheet.sp_desc += ")"
 				$('#calcSPDesc').text(charSheet.getValue("sp_desc"))
+
 				console.log(" ... CHECK")
 			},
 
 			// build description of feats used and remaining
 			fp_build: function ()
 			{
-				console.log("fp_build ... ")
+				console.log("function fp_build()")
+
 				charSheet.total_fp = Math.ceil(charSheet.getValue("total_level") / 2)
 				charSheet.fp_desc  = "(" + charSheet.getValue("total_fp")
 				if(charSheet.getValue("fp_traits")) {
@@ -215,6 +220,7 @@ if($pkid == 0) {
 				charSheet.fp_desc  = "(" + charSheet.getNumber("total_fp_used") + " / " + charSheet.getNumber("total_fp") + ") " + charSheet.getValue("fp_desc")
 				charSheet.fp_desc += ")"
 				$('#calcFPDesc').text(charSheet.getValue("fp_desc"))
+
 				console.log(" ... CHECK")
 			},
 
@@ -283,6 +289,7 @@ if($pkid == 0) {
 			cmd_build: function ()
 			{
 				console.log("function cmd_build()")
+
 				temp = 10 + charSheet.bonus(charSheet.getValue("str"), 1) + charSheet.bonus(charSheet.getValue("dex")) + charSheet.sizeBonus() + 1 * charSheet.getValue("ac_bonus_monk") + 1 * charSheet.getValue("ac_bonus_wis")
 				if(charSheet.getValue("sa_defensive_combat_training")) {
 					temp += 1 * charSheet.getValue("total_level")
@@ -294,6 +301,7 @@ if($pkid == 0) {
 					temp += Math.ceil(charSheet.getValue("class_level.MNK") / 4)
 				}
 				$('#calcCMD').text(temp)
+
 				console.log(" ... CHECK")
 			},
 
@@ -301,6 +309,7 @@ if($pkid == 0) {
 			cmb_build: function ()
 			{
 				console.log("function cmb_build()")
+
 				temp = 10 + 1 * charSheet.getValue("total_bab") + charSheet.sizeBonus() - 1 * charSheet.getValue("sa_combat_expertise")
 				if(charSheet.getValue("sa_agile_maneuvers")) {
 					temp += 1 * charSheet.bonus(charSheet.getValue("dex"))
@@ -309,6 +318,7 @@ if($pkid == 0) {
 					temp += 1 * charSheet.bonus(charSheet.getValue("str"), 1)
 				}
 				$('#calcCMB').text(temp)
+
 				console.log(" ... CHECK")
 			},
 
@@ -1314,7 +1324,6 @@ if($pkid == 0) {
 			charSheet.sa_mercy_feats = ""
 			charSheet.sa_channel_dc_feats = charSheet.sa_cp_feats = 0
 			charSheet.conc_feats = charSheet.gold_feats = 0
-			charSheet.fp_build()
 			charSheet.sq_feats = charSheet.sa_feats = charSheet.sd_feats = ""
 			charSheet.spell_like_feats = charSheet.save_feats = ""
 			for(i = 0; i < 150; i++) {
@@ -1949,6 +1958,7 @@ if($pkid == 0) {
 			// recalculate sections
 			$('#calcInit').text(10 + charSheet.bonus(charSheet.getValue("dex")) + charSheet.getValue("init_feats"))
 			charSheet.sq_build()
+			charSheet.fp_build()
 			calcSkills()
 			calcDefense()
 			calcOffense()
@@ -2011,14 +2021,6 @@ if($pkid == 0) {
 						charSheet.skills[i].total += 2
 					}
 
-					// note important skills
-					if(charSheet.getValue("skills." + i + ".name") == "Perception") {
-						charSheet.perception = 1 * charSheet.getValue("skills." + i + ".total")
-					}
-					if(charSheet.getValue("skills." + i + ".name") == "Linguistics") {
-						charSheet.lp_skills += 1 * charSheet.getValue("skills." + i + ".rank")
-					}
-
 					// armour check penalty from armour and encumbrance applies to str and dex skills
 					if(tmpAbility == "str" || tmpAbility == "dex") {
 						// calculate skill check penalty due to encumbrance
@@ -2032,9 +2034,17 @@ if($pkid == 0) {
 						}
 					}
 	
+					// note important skills
+					if(charSheet.getValue("skills." + i + ".name") == "Perception") {
+						charSheet.perception = 1 * charSheet.getValue("skills." + i + ".total")
+					}
+					if(charSheet.getValue("skills." + i + ".name") == "Linguistics") {
+						charSheet.lp_skills += 1 * charSheet.getValue("skills." + i + ".rank")
+					}
+
 					// update read/edit sections
 					$('#spantotal' + charSheet.getValue("skills." + i + ".id")).text(charSheet.getValue("skills." + i + ".total"))
-					//$('#total' + charSheet.getValue("skills." + i + ".id")).value = charSheet.getValue("skills." + i + ".total")
+					$('#total' + charSheet.getValue("skills." + i + ".id")).prop('value', charSheet.getValue("skills." + i + ".total"))
 				}
 			}
 

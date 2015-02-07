@@ -146,7 +146,7 @@ foreach($view->characterMain['class'] as $varClass) {
 		    $varClass[class_id] == "ART" or 
 		    $varClass[class_id] == "EXP" or 
 		    $varClass[class_id] == "WAR") and
-		    $view->level_quality == -3) {
+		    $view->level_quality < -1) {
 			$view->level_quality = -2;
 		}
 		else {

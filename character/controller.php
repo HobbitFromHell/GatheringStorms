@@ -231,45 +231,51 @@ if($pkid == 0) {
 
 				charSheet.ac_desc = ""
 				charSheet.total_ac = 10
+
 				if(charSheet.getValue("size") != "Medium") {
 					charSheet.ac_desc += ", +" + (-1 * charSheet.sizeBonus()) + " size"
 					charSheet.total_ac -= charSheet.sizeBonus()
 				}
 				if(charSheet.getValue("ac_luck_feats")) {
 					charSheet.ac_desc += ", +" + charSheet.getValue("ac_luck_feats") + " luck"
-					charSheet.total_ac += 1 * charSheet.getValue("ac_luck_feats")
+					charSheet.total_ac += charSheet.getNumber("ac_luck_feats")
 				}
 				if(charSheet.getValue("ac_insight_feats")) {
 					charSheet.ac_desc += ", +" + charSheet.getValue("ac_insight_feats") + " insight"
-					charSheet.total_ac += 1 * charSheet.getValue("ac_insight_feats")
+					charSheet.total_ac += charSheet.getNumber("ac_insight_feats")
 				}
 				if(charSheet.getValue("deflect")) {
 					charSheet.ac_desc += ", +" + charSheet.getValue("deflect") + " deflection"
-					charSheet.total_ac += 1 * charSheet.getValue("deflect")
+					charSheet.total_ac += charSheet.getNumber("deflect")
 				}
 				if(charSheet.getValue("loadType") < 1 && (!charSheet.getValue("armour"))) {
 					if(charSheet.getValue("ac_bonus_monk")) {
 						charSheet.ac_desc += ", +" + charSheet.getValue("ac_bonus_monk") + " monk"
-						charSheet.total_ac += 1 * charSheet.getValue("ac_bonus_monk")
+						charSheet.total_ac += charSheet.getNumber("ac_bonus_monk")
 					}
 					if(charSheet.getValue("ac_bonus_wis")) {
 						charSheet.ac_desc += ", +" + charSheet.getValue("ac_bonus_wis") + " Wis"
-						charSheet.total_ac += 1 * charSheet.getValue("ac_bonus_wis")
+						charSheet.total_ac += charSheet.getNumber("ac_bonus_wis")
 					}
 				}
-				charSheet.total_ffac = 1 * charSheet.getValue("total_ac")
+				charSheet.total_ffac = charSheet.getNumber("total_ac")
 				if(charSheet.getValue("dex") < 10) {
 					charSheet.total_ffac += charSheet.bonus(charSheet.getValue("dex"))
-				}				
+				}
 
-				// below are not included in flat-footed ac
+				// ----- below this point are not included in flat-footed ac
+
 				if(charSheet.bonus(charSheet.getValue("dex"))) {
-					temp = Math.min(charSheet.bonus(charSheet.getValue("dex")), 1 * charSheet.getValue("load_max_dex"), 1 * charSheet.getValue("ac_max_dex") + 1 * charSheet.getValue("spd_armour_training"))
+					temp = Math.min(charSheet.bonus(charSheet.getValue("dex")),
+					                charSheet.getNumber("load_max_dex"),
+					                charSheet.getNumber("ac_max_dex") + charSheet.getNumber("spd_armour_training"))
 					charSheet.ac_desc += ", +" + temp + " Dex"
 					charSheet.total_ac += temp
 				}
 
-				$tmpDodgeTotal = charSheet.getNumber("sa_two_weapon_defense") + charSheet.getNumber("ac_dodge_feats") + charSheet.getNumber("sa_combat_expertise")
+				$tmpDodgeTotal = charSheet.getNumber("sa_two_weapon_defense") +
+				                 charSheet.getNumber("ac_dodge_feats") + 
+				                 charSheet.getNumber("sa_combat_expertise")
 				if($tmpDodgeTotal) {
 					charSheet.ac_desc += ", +" + $tmpDodgeTotal + " dodge"
 					charSheet.total_ac += $tmpDodgeTotal
@@ -328,27 +334,42 @@ if($pkid == 0) {
 				console.log("function armour_build()")
 
 				charSheet.armour_desc = ""
+
 				if(charSheet.getValue("shield")) {
 					charSheet.armour_desc += ", "
-					charSheet.armour_desc += charSheet.getValue("shield.quality_format") + " " + charSheet.getValue("shield.name") + " "
-					charSheet.armour_desc += "(DC +" + (charSheet.getNumber("shield.armour_dc") + charSheet.getNumber("shield.to_hit_mod") + charSheet.getNumber("ac_shield_focus")) + ", "
-					charSheet.armour_desc += "hardness " + (charSheet.getNumber("shield.armour_hardness") + charSheet.getNumber("shield.to_hit_mod")) + ", ";
+					charSheet.armour_desc += charSheet.getValue("shield.quality_format") + " "
+					                       + charSheet.getValue("shield.name") + " "
+					charSheet.armour_desc += "(DC +" + (charSheet.getNumber("shield.armour_dc")
+					                       + charSheet.getNumber("shield.to_hit_mod")
+					                       + charSheet.getNumber("ac_shield_focus")) + ", "
+					charSheet.armour_desc += "hardness " + (charSheet.getNumber("shield.armour_hardness")
+					                       + charSheet.getNumber("shield.to_hit_mod")) + ", ";
 					charSheet.armour_desc += "hp " + (charSheet.getNumber("shield.armour_hp")) + ")"
 				}
 				else {
 					if(charSheet.getValue("ac_improvised_shield") && !charSheet.getValue("offhand")) {
-						charSheet.armour_desc += ", improvised shield (DC +" + charSheet.getValue("ac_improvised_shield") + ")"
+						charSheet.armour_desc += ", improvised shield (DC +" +
+						                         charSheet.getValue("ac_improvised_shield") + ")"
 					}
 				}
 				if(charSheet.getValue("armour")) {
 					charSheet.armour_desc += ", "
-					charSheet.armour_desc += charSheet.getValue("armour.quality_format") + " " + charSheet.getValue("armour.name") + " "
-					charSheet.armour_desc += "(DC +" + (1 * charSheet.getNumber("armour.armour_dc") + 1 * charSheet.getNumber("armour.to_hit_mod")) + ", "
-					charSheet.armour_desc += "hardness " + (charSheet.getNumber("armour.armour_hardness") + charSheet.getNumber("armour.to_hit_mod")) + ", ";
+					charSheet.armour_desc += charSheet.getValue("armour.quality_format") + " "
+					                       + charSheet.getValue("armour.name") + " "
+					charSheet.armour_desc += "(DC +" + (1 * charSheet.getNumber("armour.armour_dc")
+					                       + charSheet.getNumber("armour.to_hit_mod")) + ", "
+					charSheet.armour_desc += "hardness " + (charSheet.getNumber("armour.armour_hardness")
+					                       + charSheet.getNumber("armour.to_hit_mod")) + ", "
 					charSheet.armour_desc += "hp " + (charSheet.getNumber("armour.armour_hp")) + ")"
 				}
 				if(charSheet.getValue("ac_natural_armour")) {
-					charSheet.armour_desc += ", natural armour (DC 20, hardness " + charSheet.getValue("ac_natural_armour") + ")"
+					charSheet.armour_desc += ", natural armour (DC 20, hardness "
+					                       + charSheet.getValue("ac_natural_armour") + ")"
+				}
+				if(charSheet.getValue("shield.armour_ac") > 0 ||
+				   charSheet.getValue("armour.armour_ac") > 0) {
+					charSheet.deflect = charSheet.getValue("shield.armour_ac")
+					                  + charSheet.getValue("armour.armour_ac")
 				}
 
 				$('#calcArmour').html(charSheet.getValue("armour_desc").substr(2))
@@ -858,7 +879,7 @@ if($pkid == 0) {
 
 			// return only numeric value, default to zero
 			getNumber: function (paramVarName)
-			{ 
+			{
 				return 1 * charSheet.getValue(paramVarName, 0)
 			},
 
@@ -1499,7 +1520,7 @@ if($pkid == 0) {
 							charSheet.spell_like_feats += "; detect evil outsiders (3/day, CL " + charSheet.ordinal(charSheet.getValue("total_level")) + ")"
 							break
 						}
-						case "Resist Poison": { // 
+						case "Resist Poison": { //
 							break
 						}
 						case "Saddleback": { // Once per round, if you and/or your mount fail a Reflex save you can attempt a Ride check.
@@ -1586,7 +1607,7 @@ if($pkid == 0) {
 							charSheet.sq_feats += ", no penalty while climbing"
 							break
 						}
-						case "Twin Sword style": { // 
+						case "Twin Sword style": { //
 							break
 						}
 
@@ -1671,7 +1692,7 @@ if($pkid == 0) {
 							charSheet.sa_rapid_shot++
 							break
 						}
-						case "Greater Shield Focus": 
+						case "Greater Shield Focus":
 						case "Shield Focus": { // Gain a +1 bonus to your AC when using a shield
 							charSheet.ac_shield_focus += 1
 							break
@@ -2033,7 +2054,7 @@ if($pkid == 0) {
 							charSheet.skills[i].total -= charSheet.getValue("armour.armour_penalty")
 						}
 					}
-	
+
 					// note important skills
 					if(charSheet.getValue("skills." + i + ".name") == "Perception") {
 						charSheet.perception = 1 * charSheet.getValue("skills." + i + ".total")
@@ -2349,7 +2370,7 @@ if($pkid == 0) {
 					cfDetail = charSheet.getValue("class_features." + i + ".detail")
 					tmpSpellClass = ""
 					tmpSpellLevel = -2
-	
+
 					// handle non-spell class features
 					if(tmpSpellLevel == -2) {
 						switch(cfid) {
@@ -3295,7 +3316,7 @@ if($pkid == 0) {
 							}
 						}
 					}
-	
+
 					// check for duplicates
 					charSheet.class_features[i].count = 1
 					if(i > 0) {
@@ -3596,7 +3617,7 @@ if($pkid == 0) {
 				$("#descriptionSection").html(loadingWidget)
 				$("#organizationSection").html(loadingWidget)
 				$("#encounterSection").html(loadingWidget)
-	
+
 				// ajax call to populate first section, which cascades to populate all sections on the page
 				buildSection('Abilities')
 			}

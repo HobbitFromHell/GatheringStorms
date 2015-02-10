@@ -1,314 +1,120 @@
 <?php
+/**
+ * Hobbit From Hell common controller functions
+ *
+ * Controls communication with DB server
+ * @package Database
+ * @author Myron Wyles
+ */
 
-class BuildOutput
+/**
+ * Set primary key id from get data
+ */
+if (isset($_GET[id])) {
+	$pkid = sanitize($_GET[id]);
+}
+
+/**
+ * Stores subsection data
+ */
+class DataCollector
 {
-	private $outputRead  = "";
-	private $outputEdit  = "";
-	private $sectionName = "";
+/*
+	private $properties = array();
 
-	public function __construct($paramName = "")
+	public function __get($varKey)
 	{
-		$this->setSectionName($paramName);
+		if (array_key_exists($varKey, $this->properties)) {
+			return $this->properties[$varKey];
+		}
 	}
 
-	public function setSectionName($paramName)
+	public function __set($varKey, $varValue)
 	{
-		$this->sectionName = $paramName;
+		$this->properties[$varKey] = $varValue;
 	}
+*/
 
-	public function lcSectionName()
+	/**
+	 * Assign a list of options
+	 *
+	 * Used for any field with limited, hardcoded options.
+	 * Reformats a string to an object with value and list so
+	 * the builder can render as a SELECT.
+	 * @param string (selected value)
+	 * @param array (option list)
+	 * return object (value and list together)
+	 */
+	public function setList($paramValue, $paramList)
 	{
-		return strtolower($this->sectionName);
+		$ret = array();
+
+		$ret[value]  = $paramValue;
+		$ret['list'] = $paramList;
+
+		return $ret;
 	}
 
 	/**
-	 *	@parameter $paramColumnName - id used to post data
-	 *	@parameter $paramField      - is_string: input type=text (e.g. name)
-	 *                              - is_array:  contains [value] means select (e.g. alignment)
-	 *                                           contains [name] means many-to-one (e.g. race)
-	 *                                           contains [0][name] means many-to-many (e.g. class)
-	 *	@parameter $paramKeyRead    - label in read mode: "()" to parethesize, "0" means do not show
-	 *	@parameter $paramKeyEdit    - label in edit mode: "0" means do not show
-	 *	@parameter $paramFieldSize  - optional size in pt
-	 *	@parameter $paramMetadata   - optional is_array: "DELETE" to include (-) button
-	 *                                         "BREAK" to follow each series with <br>
-	 *                                         other is_string to be a separator string
-	 *                                         is_array: id used to post data
-	 *                                                   read label (0 means do not show in read mode; () means parenthisize)
-	 *                                                   edit label (0 means do not show in edit mode)
-	 *                                                   size
-	 *                                                   optional default value
-	 *                                                   optional array(options, makes select instead of text)
+	 * Assign a list of options
+	 *
+	 * Used for ENUM and SET data types with dynamic options.
+	 * Reformats a string to an object with value and list so
+	 * the builder can render as a SELECT.
+	 * @param string (table name)
+	 * @param string (column name)
+	 * @param string (selected ENUM value)
+	 *     or array (selected SET values)
+	 * return object (value and list together)
 	 */
-	public function add($paramColumnName, $paramField, $paramKeyRead = "", $paramKeyEdit = "", $paramFieldSize = null, $paramMetadata = null)
+	public function getEnum($paramTable, $paramColumn, $paramValue)
 	{
-		if($paramKeyRead > "" and $paramKeyEdit === "") {
-			$paramKeyEdit = $paramKeyRead;
-		}
-		if(!is_array($paramField)) {
-			if($paramColumnName and $paramKeyEdit === 0) {
-			// hidden
-				$this->addEdit("<input type=\"hidden\" id=\"{$paramColumnName}\" value=\"{$paramField}\">");
-			}
-			// text
-			if ($paramKeyRead !== 0) {
-				$tmpFormatField = $paramField;
-				if($paramFieldSize == "textbox" or $paramFieldSize == "textarea") {
-					$tmpFormatField = str_replace("\r", "", $tmpFormatField);
-					$tmpFormatField = str_replace("\n", "<br>", $tmpFormatField);
-					$tmpFormatField = str_replace("\"", "''", $tmpFormatField);
-					$tmpFormatField .= "&nbsp;"; // force a space to give the text block a mininum size
-				}
-				$this->addRead("<span id=\"span$paramColumnName\">" . $tmpFormatField . "</span>", $paramKeyRead);
-			}
-			if ($paramKeyEdit !== 0) {
-				// html (do not use as input value)
-				if(strrpos($paramField, "<") !== false) {
-					$this->addEdit($paramKeyEdit);
-					return;
-				}
-				if($paramFieldSize == "textbox" or $paramFieldSize == "textarea") {
-					$this->addEdit("<textarea id=\"{$paramColumnName}\" rows=\"5\" style=\"width:100%\">{$paramField}</textarea>", $paramKeyEdit);
-				}
-				else {
-					$this->addEdit("<input type=\"text\" id=\"{$paramColumnName}\" value=\"{$paramField}\" style=\"width:{$paramFieldSize}pt\">", $paramKeyEdit);
-				}
-			}
-		}
-		else if(is_array($paramField)) {
-			if(array_key_exists('value', $paramField)) {
-				if(is_array($paramField[value])) {
-					// multiple select
-					$this->addRead(implode(", ", $paramField[value]), $paramKeyRead);
-					if ($paramColumnName !== "") {
-						$this->addEdit("<select multiple=\"multiple\" id=\"{$paramColumnName}\" style=\"width:{$paramFieldSize}pt\">", $paramKeyEdit);
-						foreach ($paramField['list'] AS $list_item) {
-							$this->addEdit("<option value=\"{$list_item}\"");
-							foreach ($paramField[value] AS $list_selected) {
-								if($list_item == $list_selected) {
-									$this->addEdit(" selected=\"selected\"");
-								}
-							}
-							$this->addEdit(">{$list_item}</option>");
-						}
-						$this->addEdit("</select>");
-					}
-				}
-				else {
-					// single select
-					$this->addRead($paramField[value], $paramKeyRead);
-					if ($paramColumnName !== "") {
-						$this->addEdit("<select id=\"{$paramColumnName}\" style=\"width:{$paramFieldSize}pt\">", $paramKeyEdit);
-						foreach ($paramField['list'] AS $list_item) {
-							$this->addEdit("<option value=\"{$list_item}\"");
-							if($list_item == $paramField[value]) {
-								$this->addEdit(" selected=\"selected\"");
-							}
-							$this->addEdit(">{$list_item}</option>");
-						}
-						$this->addEdit("</select>");
-					}
-				}
-			}
-			if(array_key_exists('name', $paramField)) {
-				// many-to-one DB relationship
-				// show description, if it exists
-				if($paramField[description]) {
-					$this->addRead("<span title=\"" . $paramField[description] . "\">");
-				}
-				$this->addRead($paramField[name], $paramKeyRead);
-				if($paramField[description]) {
-					$this->addRead("</span>");
-				}
-				if ($paramColumnName !== "") {
-					$this->addEdit("<select id=\"$paramColumnName\" style=\"width:{$paramFieldSize}pt\">", $paramKeyEdit);
-					foreach ($paramField['list'] AS $list_item) {
-						$this->addEdit("<option value=\"{$list_item[id]}\"");
-						if($list_item[name] == $paramField[name]) {
-							$this->addEdit(" selected=\"selected\"");
-						}
-						$this->addEdit(">{$list_item[name]}</option>");
-					}
-					$this->addEdit("</select>");
-				}
-			}
-//			if(is_string($paramField[0])) {
-//			// select multiple
-//				$this->addEdit("MULTI TO DO");
-//			}
-			if(array_key_exists($i = 0, $paramField)) {
-//			if(is_array($paramField[$i = 0])) {
-//			if(is_array($paramMetadata)) {
-			// many-to-many DB relationship
-				if($paramKeyRead !== 0) {
-					$this->addRead("", $paramKeyRead);
-				}
-				$this->addEdit("", $paramKeyEdit);
-				$paramField[] = array(id=>0); // append a field with id 0 for "add new" function
-				$seperator = "";
-				$delete = $break = false;
-				while(array_key_exists($i, $paramField)) {
-					if($paramKeyRead !== 0) {
-						if($i > 0 and $paramField[$i][id] != 0) {
-							$this->addRead($seperator);
-						}
-						if($paramField[$i][description]) {
-							$this->addRead("<span title=\"" . $paramField[$i][description] . "\">");
-						}
-						$this->addRead($paramField[$i][name]);
-						if($paramField[$i][description]) {
-							$this->addRead("</span>");
-						}
-					}
-					$this->addEdit("<span id=\"div{$paramColumnName}{$paramField[$i][id]}\" class=\"manyToMany\"");
-					if($paramField[$i][id] < 1) {
-						$this->addEdit(" style=\"display:none\"");
-					}
-					$this->addEdit(">");
-					$this->addEdit("<select id=\"{$paramColumnName}{$paramField[$i][id]}\" style=\"width:{$paramFieldSize}pt\">");
-					if($paramField[$i][id] < 1) {
-						$this->addEdit("<option value=\"\" selected=\"selected\"></option>");
-					}
-					else {
-						$this->addEdit("<option value=\"{$paramField[$i][name]}\" selected=\"selected\">{$paramField[$i][name]}</option>");
-					}
-					foreach($paramField['list'] as $list_item) {
-						$this->addEdit("<option value=\"" . $list_item[id] . "\"");
-						if($list_item[name] == $paramField[$i][name]) {
-							$this->addEdit(" selected=\"selected\"");
-						}
-						$this->addEdit(">" . $list_item[name] . "</option>");
-					}
-					$this->addEdit("</select>");
-					if(is_array($paramMetadata)) {
-						foreach($paramMetadata as $item) {
-							if(is_array($item)) { // array elements are for display
-								// set read label
-								if($paramKeyRead === 0) {
-									$temp = 0;
-								}
-								else {
-									$temp = $item[1];
-								}
-								// set default value
-								if($item[4]) {
-									if($item[5]) {
-										$temp2 = "";
-										$temp2[value] = $item[4];
-										$temp2['list'] = $item[5];
-									}
-									else {
-										$temp2 = $item[4];
-									}
-								}
-								else {
-									if($item[5]) {
-										$temp2 = "";
-										$temp2[value] = $paramField[$i][$item[0]];
-										$temp2['list'] = $item[5];
-									}
-									else {
-										$temp2 = $paramField[$i][$item[0]];
-									}
-								}
-								// add each item in the many-to-many relationship
-								$this->add($item[0].$paramField[$i][id], $temp2, $temp, $item[2], $item[3]);
-							}
-							else { // non-array elements are commands; if unrecognized, use as the seperator
-								if($item == "DELETE") {
-									$delete = true;
-								}
-								else {
-									if($item == "BREAK") {
-										$break = true;
-									}
-									else {
-										$seperator = $item;
-									}
-								}
-							}
-						}
-					}
-					if($delete) {
-						$this->addEdit("<input type=\"button\" value=\"-\" onClick=\"this.parentNode.style.display='none'; for(var x = 0; x < this.parentNode.childNodes.length; x++) if(this.parentNode.childNodes[x].id && this.parentNode.childNodes[x].id.substr(0, 10) == 'is_deleted') this.parentNode.childNodes[x].value = 'Yes';\">");
-					}
-					$this->addEdit("&nbsp;</span>");
-					if($break and $paramField[$i][id] != 0) {
-						$this->addEdit("<br>");
-					}
-					$i++;
-				}
-				// add new button
-				$this->addEdit("<span id=\"div{$paramColumnName}addnew\"><input type=\"button\" id=\"addnew{$paramColumnName}\" value=\"+\" onClick=\"copyFromTemplate('{$paramColumnName}')\"><span id=\"spacer\"> </span></span>\n");
-			}
-		}
-	}
+		$ret = array();
+		$varDataType = "";
+		$varEnumSet = DataConnector::selectQuery("
+			SELECT COLUMN_TYPE, COLUMN_DEFAULT, IS_NULLABLE
+			  FROM INFORMATION_SCHEMA.COLUMNS
+			 WHERE TABLE_NAME = '{$paramTable}'
+			   AND COLUMN_NAME = '{$paramColumn}'
+		");
 
-	public function addRead($paramField, $paramKey = "")
-	{
-		if($paramKey !== 0) {
-			if($paramKey == "()") {
-				if($paramField and strpos($paramField, "><") === false) { // must contain visible text
-					$this->outputRead .= "(" . $paramField . ") ";
-				}
+		// identify data type
+		if(is_array($paramValue)) {
+			// selected value is an array:
+			// look for a set, which can select multiples
+			if(substr($varEnumSet[COLUMN_TYPE], 0, 3) != "set") { // invalid set data type
+				return "error";
 			}
-			else  {
-				if($paramKey) {
-					$this->outputRead .= "<b class=\"statBlockLabel\">{$paramKey}</b> ";
-				}
-				$this->outputRead .= $paramField . " ";
+			$varDataType = "set";
+		}
+		else {
+			// selected value is a string:
+			// look for an enum, which can select only one
+			if(substr($varEnumSet[COLUMN_TYPE], 0, 4) != "enum") { // invalid enum data type
+				return "error";
 			}
+			$varDataType = "enum";
 		}
-	}
 
-	public function addEdit($paramField, $paramKey = "")
-	{
-		if($paramKey and $paramKey != "()") {
-			$this->outputEdit .= "{$paramKey} ";
+		// set current value
+		if($paramValue) {
+			$ret['value'] = $paramValue;
 		}
-		$this->outputEdit .= $paramField . " ";
-	}
+		else {
+			$ret['value'] = $varEnumSet[COLUMN_DEFAULT];
+		}
 
-	public function br()
-	{
-		$this->addRead("<br>");
-		$this->addEdit("<br>");
-	}
+		// set list of options
+		// explode list from DB on comma, after stripping the ends
+		$ret['list'] = explode(",", str_replace("'", "", substr($varEnumSet[COLUMN_TYPE], strlen($varDataType) + 1, -1)));
+		// sort ascending
+		asort($ret['list']);
+		if($varDataType == "enum") {
+			// ENUM data type gets a blank option at the beginning
+			array_unshift($ret['list'], "");
+		}
 
-	public function dump($paramScope = 1)
-	{
-//		$this->outputRead = "				<input type=\"button\" value=\"R\" onClick=\"reloadSection('{$this->lcSectionName()}')\">";
-		$this->outputRead = "
-			</div>
-			{$this->outputRead}
-		</div>
-		";
-		if($paramScope == 1) {
-			$this->outputRead = "
-				<img src=\"/img/edit.png\" onClick=\"editSection('{$this->lcSectionName()}')\">
-			{$this->outputRead}
-			";
-		}
-		$this->outputRead = "
-		<div id=\"{$this->lcSectionName()}Read\" class=\"statBlockRead\" style=\"display:block\">
-			<div id=\"{$this->lcSectionName()}ReadControl\" class=\"statBlockControl\" style=\"align:right\">
-			{$this->outputRead}
-		";
-		if($paramScope == 0) {
-			return $this->outputRead . "<div id=\"{$this->lcSectionName()}Edit\" class=\"statBlockEdit\" style=\"display:none\"></div>";
-		}
-		$this->outputEdit = "
-		<div id=\"{$this->lcSectionName()}Edit\" class=\"statBlockEdit\" style=\"display:none\">
-		<form id=\"{$this->lcSectionName()}Form\">
-			<div id=\"{$this->lcSectionName()}ReadControl\" class=\"statBlockControl\" style=\"align:right\">
-				<img src=\"/img/check.png\" onClick=\"saveSection('{$this->lcSectionName()}', serializeParams('{$this->lcSectionName()}'))\">
-				<img src=\"/img/batsu.png\" onClick=\"abortSection('{$this->lcSectionName()}')\">
-			</div>
-			{$this->outputEdit}
-		</form>
-		</div>
-		";
-		return $this->outputRead . $this->outputEdit;
+		return $ret;
 	}
 }
 

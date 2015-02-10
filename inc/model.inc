@@ -1,12 +1,15 @@
 <?php
-
-// set primary key id from get data
-if (isset($_GET[id])) {
-	$pkid = sanitize($_GET[id]);
-}
+/**
+ * Hobbit From Hell common model functions
+ *
+ *
+ * Controls communication with DB server
+ * @package Database
+ * @author Myron Wyles
+ */
 
 /**
- *	An extention of the Mysqli class 
+ *	An extention of the Mysqli class
  *
  *	@package Database
  *	@author Myron Wyles
@@ -14,126 +17,108 @@ if (isset($_GET[id])) {
 class DataConnector extends Mysqli
 {
 	/*
-	 * singleton instance toggle
+	 * Singleton instance extant toggle
 	 * @var boolean
 	 */
 	private static $instance = false;
+
+	/*
+	 * Singleton instance extant toggle
+	 * @var Mysqli query object
+	 */
 	private static $res;
 
+	/*
+	 * Constructor
+	 *
+	 * Pass hardcoded DB connection details to parent
+	 * constructor.
+	 */
 	private function __construct()
 	{
-		parent::__construct("localhost", "dm", "XYZE7ht39hJqw534", "hfh");
+		parent::__construct("localhost",
+		                    "dm",
+		                    "XYZE7ht39hJqw534",
+		                    "hfh"
+		                   );
 	}
 
-	public static function selectQuery($query = null)
+	/*
+	 * handles communication of data with DB server
+	 *
+	 * @param string (optional, if absent returns next record)
+	 * @param boolean (option, default true)
+	 * @return array (if a record is available)
+	 *      or string (error message or insert_id)
+	 */
+	public static function selectQuery($paramQuery = null, $paramReturnRecord = true)
 	{
 		if(self::$instance === false) {
 			self::$instance = new DataConnector;
 		}
-		if($query) {
-			self::$res = self::$instance->query($query);
+		if($paramQuery) {
+			self::$res = self::$instance->query($paramQuery);
 		}
-		return self::$res->fetch_assoc();
-	}
-
-	public static function updateQuery($query = null)
-	{
-		if(self::$instance === false) {
-			self::$instance = new DataConnector;
-		}
-		if($query) {
-			self::$res = self::$instance->query($query);
-		}
-		return self::$instance->insert_id;
-	}
-}
-
-class DataCollector
-{
-/*
-	private $properties = array();
-
-	public function __get($varKey)
-	{
-		if (array_key_exists($varKey, $this->properties)) {
-			return $this->properties[$varKey];
-		}
-	}
-
-	public function __set($varKey, $varValue)
-	{
-		$this->properties[$varKey] = $varValue;
-	}
-*/
-	public function setList($string, $list_array)
-	{
-		$ret = array();
-		$ret[value] = $string;
-		$ret['list'] = $list_array;
-		return $ret;
-	}
-
-	public function getEnum($paramTable, $paramColumn, $paramValue)
-	{
-		$ret = array();
-		$varDataType = "";
-		$varEnumSet = DataConnector::selectQuery("
-			SELECT COLUMN_TYPE, COLUMN_DEFAULT, IS_NULLABLE
-			  FROM INFORMATION_SCHEMA.COLUMNS
-			 WHERE TABLE_NAME = '{$paramTable}'
-			   AND COLUMN_NAME = '{$paramColumn}'
-		");
-		if(is_array($paramValue)) { // look for a set, which can select multiples
-			if(substr($varEnumSet[COLUMN_TYPE], 0, 3) != "set") { // invalid set data type
-				return "error";
-			}
-			$varDataType = "set";
-		}
-		else { // look for an enum, which can select only one
-			if(substr($varEnumSet[COLUMN_TYPE], 0, 4) != "enum") { // invalid enum data type
-				return "error";
-			}
-			$varDataType = "enum";
-		}
-		// set value
-		if($paramValue) {
-			$ret['value'] = $paramValue;
+		// to do: on error, return error information
+		if($paramReturnRecord) {
+			return self::$res->fetch_assoc();
 		}
 		else {
-			$ret['value'] = $varEnumSet[COLUMN_DEFAULT];
+			return self::$instance->insert_id;
 		}
-		// set list options
-		$ret['list'] = explode(",", str_replace("'", "", substr($varEnumSet[COLUMN_TYPE], strlen($varDataType) + 1, -1)));
-		asort($ret['list']);
-		if($varDataType == "enum") {
-			array_unshift($ret['list'], "");
+	}
+
+	/*
+	 * sets up INSERT request for selectQuery()
+	 *
+	 * @param string
+	 * @return same as selectQuery()
+	 */
+	public static function updateQuery($paramQuery = null)
+	{
+		if($paramQuery) {
+			return self::selectQuery($paramQuery, false);
 		}
-		return $ret;
 	}
 }
 
+/**
+ * Sanitize data from user or database
+ *
+ * stripslashes removes escaped quotes. htmlentities
+ * converts special characters to HTML entities. strip_tags
+ * removes HTML and PHP tags. And finally quote characters
+ * are replaced with two quote characters.
+ * @param string
+ * @return string
+ */
 function sanitize($paramValue)
 {
 	return str_replace("'", "''", stripslashes(htmlentities(strip_tags($paramValue))));
 }
 
 /**
- *	post_data - transforms post data into sql updates, and sends to the database
+ * Transforms POST data into SQL INSERT statements
  *
- *	@author Myron Wyles
- *
- *	paramTable   table name
- *	paramKey     primary key of the table, usually "id"
- *                      - ignored when adding a new record, when identical to paramID, and when blank
- *                      - set to id number embedded in post parameters
- *	paramID      relational id: "id" in same table, "character_id", "location_id", etc. everywhere else (matches $pkid)
- *                      - always set to $postID
- *	paramDataArray   array of column names to update; may contain an array with translation for post name, column name
+ * Compares a controller-defined checklist with available
+ * POST data to build a series of INSERT ON DUP UPDATE
+ * statements to save to the DB.
+ * @param string (table name)
+ * @param string (primary key name of table, usually "id";
+ *                set to id number embedded in post params;
+ *                ignored when adding a new record, same as
+ *                $paramID, or blank)
+ * @param string (relational ID to main table, such as
+ *                "character_id"; matches $pkid; always set
+ *                to $postID)
+ * @param array (column names; may contain an array with
+ *               translation for post name, column name
+ * @return boolean (true = POST data, false = none)
  */
 function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 {
-// DEBUG
-// foreach($_POST as $varKey => $varValue) echo "{$varKey} = {$varValue}<br>";
+	// DEBUG
+	// foreach($_POST as $varKey => $varValue) echo "{$varKey} = {$varValue}<br>";
 
 	// post data means an update or insert
 	if (isset($_POST[id])) {
@@ -143,7 +128,8 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 			if(is_array($varValue)) {
 				$varValue = implode(",", $varValue);
 			}
-			// find post parameters with tailing numeric portion, which is the primary key (negative value = insert new record)
+			// find post parameters with tailing numeric portion,
+			// which is the primary key (negative value = insert new record)
 			preg_match("/^([a-z_]+)([-\d]+)$/", $varKey, $varMatches);
 			if(isset($varMatches[2])) { // tailing numeric portion found
 				$postAddNewID = $varMatches[2]; // set primary key value
@@ -159,43 +145,58 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 				}
 			}
 			foreach($paramDataArray as $varField) {
-// DEBUG
-// echo("{$varMatches[1]} == {$varField[0]}?");
+				// DEBUG
+				// echo("{$varMatches[1]} == {$varField[0]}?");
 				if($varMatches[1] == $varField[0]) {
-// DEBUG
-// echo("<b> Yes! {$varField[0]} = {$varValue}</b> and count = ");
+					// found matching field in POST data and checklist
+					// DEBUG
+					// echo("<b> Yes! {$varField[0]} = {$varValue}</b> and count = ");
 					$postArray[$postAddNewID][$varField[0]] = sanitize($varValue);
-// DEBUG
-// echo(count($postArray[$postAddNewID]) . "/" . count($paramDataArray) . "<br>");
-					if(count($postArray[$postAddNewID]) == count($paramDataArray)) { // the expected number of params
-						// if the id is negative, add a new record
-						if($postAddNewID > 0 or isset($postArray[$postAddNewID][$paramDataArray[0][0]])) {
+					// DEBUG
+					// echo(count($postArray[$postAddNewID]) . "/" . count($paramDataArray) . "<br>");
+					if(count($postArray[$postAddNewID]) == count($paramDataArray)) {
+						// the expected number of params are collected
+						if($postAddNewID > 0 or
+						   isset($postArray[$postAddNewID][$paramDataArray[0][0]])) {
+							// update existing record or add new record
+							// written as one INSERT ON DUP UPDATE statement
+							// start with primay key name
 							$varQuery = "INSERT INTO `{$paramTable}` (`{$paramID}`";
 							if($postAddNewID > 0 && $paramKey && $paramID != $paramKey) {
+								// if updating, and there is a relational key
+								// different than the primay key: add name to query
 								$varQuery .= ", `{$paramKey}`";
 							}
 							foreach($paramDataArray as $varField2) {
+								// add each field name in checklist to query
 								$varQuery .= ", `{$varField2[1]}`";
 							}
+							// write values to query,
+							// starting with primary key value
 							$varQuery .= ") VALUES ('{$postID}'";
 							if($postAddNewID > 0 && $paramKey && $paramID != $paramKey) {
+								// if updating, and there is a relational key
+								// different than the primay key: add value to query
 								$varQuery .= ", {$postAddNewID}";
 							}
 							foreach($paramDataArray as $varField2) {
+								// add each field value in checklist to query
 								$varQuery .= ", '{$postArray[$postAddNewID][$varField2[0]]}'";
 							}
 							$varQuery .= ") ON DUPLICATE KEY UPDATE ";
+							// write update portion, which is the same
+							// information as above, formatted differently
 							foreach($paramDataArray as $varField2) {
 								if($paramDataArray[0] != $varField2) {
 									$varQuery .= ", ";
 								}
 								$varQuery .= "`{$varField2[1]}` = '{$postArray[$postAddNewID][$varField2[0]]}'";
 							}
-// DEBUG
-// echo($varQuery);
+							// DEBUG
+							// echo($varQuery);
 							DataConnector::updateQuery($varQuery);
-// DEBUG
-// echo("DONE");
+							// DEBUG
+							// echo("DONE");
 						}
 						// unset to avoid collisions during multiple inserts
 						unset($postArray[$postAddNewID]);

@@ -42,8 +42,8 @@ if($view->storedGear) {
 $output->add("weapon", $view->characterTreasure[weapon], 0, "<b>Weapons</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "90"), 
-		array("count", "", "", "30"), 
-		array("is_equipped", 0, "", "72", "", array("Melee", "Off-Hand", "Ranged", "No", "Mount", "Storage")), 
+		array("count", "", "", "30", "1"), 
+		array("is_equipped", 0, "", "72", "", array("Melee", "Off-Hand", "Ranged", "Yes", "No", "Mount", "Storage")), 
 		array("is_deleted", 0, 0, 0)
 	)
 );
@@ -53,8 +53,8 @@ $output->addEdit("<br>");
 $output->add("armour", $view->characterTreasure[armour], 0, "<b>Armour</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "90"), 
-		array("count", "", "", "30"), 
-		array("is_equipped", 0, "", "72", "", array("Armour", "No", "Mount", "Storage")), 
+		array("count", "", "", "30", "1"), 
+		array("is_equipped", 0, "", "72", "", array("Armour", "Yes", "No", "Mount", "Storage")), 
 		array("is_deleted", 0, 0, 0)
 	)
 );
@@ -64,7 +64,7 @@ $output->addEdit("<br>");
 $output->add("other", $view->characterTreasure[other], 0, "<b>Other</b><br>", "100",
 	array("DELETE", "; ", 
 		array("quality", "", "", "90"), 
-		array("count", "", "", "30"), 
+		array("count", "", "", "30", "1"), 
 		array("is_equipped", 0, "", "72", "", array("Yes", "No", "Mount", "Storage", "Melee", "Off-Hand", "Ranged", "Armour")), 
 		array("is_deleted", 0, 0, 0)
 	)

@@ -1,4 +1,21 @@
 <?php
+// exception handler
+function redirect_on_error($e) {
+	ob_end_clean();
+	if(is_a($e, "AuthException")) {
+		header("Location: /login/php");
+	}
+	else if(is_a($e, "DataException")) {
+		header("Location: /data/php");
+	}
+	else {
+		include("error.html");
+	}
+}
+// set exception handler
+set_exception_handler("redirect_on_error");
+
+
 /**
  * Hobbit From Hell common model functions
  *
@@ -20,10 +37,10 @@ class DataConnector extends Mysqli
 	 * Singleton instance extant toggle
 	 * @var boolean
 	 */
-	private static $instance = false;
+	private static $instance = FALSE;
 
 	/*
-	 * Singleton instance extant toggle
+	 * Singleton instance
 	 * @var Mysqli query object
 	 */
 	private static $res;
@@ -51,18 +68,28 @@ class DataConnector extends Mysqli
 	 * @return array (if a record is available)
 	 *      or string (error message or insert_id)
 	 */
-	public static function selectQuery($paramQuery = null, $paramReturnRecord = true)
+	public static function selectQuery($paramQuery = NULL, $paramReturnRecord = TRUE)
 	{
-		if(self::$instance === false) {
-			self::$instance = new DataConnector;
+		// if singleton not yet instantiated:
+		if(self::$instance === FALSE) {
+			try {
+				self::$instance = new DataConnector;
+			}
+			catch (DataException $e) {
+				throw $e;
+			}
 		}
+
+		// if query parameter was passed: set query
 		if($paramQuery) {
 			self::$res = self::$instance->query($paramQuery);
 		}
-		// to do: on error, return error information
+
+		// if return data requested (i.e. select statement result):
 		if($paramReturnRecord) {
 			return self::$res->fetch_assoc();
 		}
+		// otherwise: return insert id
 		else {
 			return self::$instance->insert_id;
 		}
@@ -74,10 +101,10 @@ class DataConnector extends Mysqli
 	 * @param string
 	 * @return same as selectQuery()
 	 */
-	public static function updateQuery($paramQuery = null)
+	public static function updateQuery($paramQuery = NULL)
 	{
 		if($paramQuery) {
-			return self::selectQuery($paramQuery, false);
+			return self::selectQuery($paramQuery, FALSE);
 		}
 	}
 }
@@ -85,16 +112,35 @@ class DataConnector extends Mysqli
 /**
  * Sanitize data from user or database
  *
- * stripslashes removes escaped quotes. htmlentities
- * converts special characters to HTML entities. strip_tags
- * removes HTML and PHP tags. And finally quote characters
- * are replaced with two quote characters.
+ * htmlentities converts special characters to HTML entities
+ * strip_tags removes HTML and PHP tags. And finally quote
+ * characters are replaced with two quote characters.
  * @param string
  * @return string
  */
 function sanitize($paramValue)
 {
-	return str_replace("'", "''", stripslashes(htmlentities(strip_tags($paramValue))));
+	$varNewValue = $paramValue;
+
+	$UNSAFE_JS[] = "onabort";
+	$UNSAFE_JS[] = "onchange";
+	$UNSAFE_JS[] = "onclick";
+	$UNSAFE_JS[] = "onerror";
+	$UNSAFE_JS[] = "onfocus";
+	$UNSAFE_JS[] = "onmouseout";
+	$UNSAFE_JS[] = "onmouseover";
+	$UNSAFE_JS[] = "onload";
+	$UNSAFE_JS[] = "onreset";
+	$UNSAFE_JS[] = "onselect";
+	$UNSAFE_JS[] = "onsubmit";
+	$UNSAFE_JS[] = "onunload";
+
+	foreach($UNSAFE_JS as $rule) {
+		$varNewValue = str_ireplace($rule, "", $varNewValue);
+	}
+
+	$ret = str_replace("'", "''", htmlentities(strip_tags($varNewValue)));
+	return $ret;
 }
 
 /**
@@ -120,30 +166,47 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 	// DEBUG
 	// foreach($_POST as $varKey => $varValue) echo "{$varKey} = {$varValue}<br>";
 
-	// post data means an update or insert
-	if (isset($_POST[id])) {
-		$postID = sanitize($_POST[id]);
+	// if post data was sent: perform an update or insert
+	if (isset($_POST['id'])) {
+		// id should always appear
+		$postID = sanitize($_POST['id']);
+		// array for gathering post data for similar record
 		$postArray = Array();
+
+		// for each post parameter
 		foreach($_POST as $varKey => $varValue) {
+
+			// if post parameter is an array: convert to string
 			if(is_array($varValue)) {
 				$varValue = implode(",", $varValue);
 			}
+
 			// find post parameters with tailing numeric portion,
-			// which is the primary key (negative value = insert new record)
+			// which is the primary key for the table
+			// (negative value = insert new record; zero = ignore)
 			preg_match("/^([a-z_]+)[0]?([-\d]+)$/", $varKey, $varMatches);
-			if(isset($varMatches[2])) { // tailing numeric portion found
-				$postAddNewID = $varMatches[2]; // set primary key value
+
+			// if tailing numeric portion found: set primary key value
+			if(isset($varMatches[2])) {
+				$postAddNewID = $varMatches[2];
 			}
+			// otherwise: mark primary key unnecessary
 			else {
 				$varMatches[1] = $varKey;
-				$postAddNewID = 0;
+				$postAddNewID = 'X';
 			}
+
+			// process variable checklist parameter
 			for($i = 0; $i < count($paramDataArray); $i++) {
+				// if check is not an array:
 				if(is_string($paramDataArray[$i])) {
+					// convert to array so everything is the same
 					$varTmp = $paramDataArray[$i];
 					$paramDataArray[$i] = array($varTmp, $varTmp);
 				}
 			}
+
+			// for each item in checklist parameter
 			foreach($paramDataArray as $varField) {
 				// DEBUG
 				// echo("{$varMatches[1]} == {$varField[0]}?");
@@ -156,7 +219,7 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 					// echo(count($postArray[$postAddNewID]) . "/" . count($paramDataArray) . "<br>");
 					if(count($postArray[$postAddNewID]) == count($paramDataArray)) {
 						// the expected number of params are collected
-						if($postAddNewID > 0 or ($postAddNewID < 0 and
+						if($postAddNewID > 0 or $postAddNewID == 'X' or ($postAddNewID < 0 and
 						   isset($postArray[$postAddNewID][$paramDataArray[0][0]]))) {
 							// update existing record or add new record
 							// written as one INSERT ON DUP UPDATE statement
@@ -194,7 +257,7 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 							}
 							// DEBUG
 							// echo($varQuery);
-							DataConnector::updateQuery($varQuery);
+							 DataConnector::updateQuery($varQuery);
 							// DEBUG
 							// echo("<br>\n");
 						}
@@ -204,9 +267,9 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 				}
 			}
 		}
-		return true;
+		return TRUE;
 	}
-	return false;
+	return FALSE;
 }
 
 ?>

@@ -1,4 +1,7 @@
 <?php
+
+include "databaseCredentials.inc";
+
 // exception handler
 function redirect_on_error($e) {
 	ob_end_clean();
@@ -53,10 +56,21 @@ class DataConnector extends Mysqli
 	 */
 	private function __construct()
 	{
-		parent::__construct("localhost",
-		                    "dm",
-		                    "XYZE7ht39hJqw534",
-		                    "hfh"
+		switch($_SERVER['HTTP_HOST']) {
+			case "hfh.myronwyles.com":
+				$connectorCred = new StagDBCredentials;
+				break;
+			case "members.shaw.ca":
+				$connectorCred = new ProdDBCredentials;
+				break;
+			default:
+				$connectorCred = new DevDBCredentials;
+		}
+
+		parent::__construct($connectorCred->name,
+		                    $connectorCred->user,
+		                    $connectorCred->pass,
+		                    $connectorCred->schema
 		                   );
 	}
 

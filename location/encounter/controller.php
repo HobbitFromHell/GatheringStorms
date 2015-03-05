@@ -35,17 +35,17 @@ $j = DataConnector::selectQuery("
 	         e.`cr`                   AS `cr`,
 	         e.`cr_min`               AS `cr_min`,
 	         e.`chance`               AS `chance`
-	   FROM t_encounters e
-	   LEFT JOIN t_chapters c
-	     ON c.`id` = e.`chapter_id`
-	   LEFT JOIN t_stories s
-	     ON s.`id` = c.`story_id`
-	   LEFT JOIN t_encounters te
-	     ON e.`trigger_encounter_id` = te.`id`
-	  WHERE e.`location_id` = '{$pkid}'
+	   FROM  `t_encounters` e
+	   LEFT JOIN `t_chapters` c
+	     ON  c.`id` = e.`chapter_id`
+	   LEFT JOIN `t_stories` s
+	     ON  s.`id` = c.`story_id`
+	   LEFT JOIN `t_encounters` te
+	     ON  e.`trigger_encounter_id` = te.`id`
+	  WHERE  e.`location_id` = '{$pkid}'
+	    AND  e.`is_active` = 'Yes'
 	  ORDER BY s.`name`, c.`name`, e.`trigger_day`
 ");
-//	    AND e.`is_active` = 'Yes'
 
 while($j) {
 	$view->locationEncounter[] = $j;

@@ -68,6 +68,10 @@ $output->add("", number_format($view->locationMain['population']), "Population",
 $output->add("population", $view->locationMain['population'], 0, "Population", "100");
 $output->br();
 
+// religions
+$output->add("religions", $view->locationMain['religions'], "Religions", "Religions", 330);
+$output->br();
+
 // market place subsection
 $output->add("", "<h6 class=\"statBlockSection\">Market Place</h6>", "", "", "");
 

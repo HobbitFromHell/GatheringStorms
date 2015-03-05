@@ -40,13 +40,14 @@ $view->characterEncounter[] = DataConnector::selectQuery("
 	        IFNULL(l.`name`, e.`location_id`) AS `location`
 	   FROM `t_characters_encounters` ce
 	   JOIN `t_encounters` e
-	     ON e.`id` = ce.`encounter_id`
+	     ON  e.`id` = ce.`encounter_id`
+	    AND  e.`is_active` = 'Yes'
 	   JOIN `t_chapters` c
-	     ON e.`chapter_id` = c.`id`
+	     ON  e.`chapter_id` = c.`id`
 	   JOIN `t_stories` s
-	     ON c.`story_id` = s.`id`
+	     ON  c.`story_id` = s.`id`
 	   LEFT JOIN `t_locations` l
-	     ON l.`id` = e.`location_id`
+	     ON  l.`id` = e.`location_id`
 	   LEFT JOIN `t_encounters` te
 	     ON te.`id` = e.`trigger_encounter_id`
 	  WHERE ce.`character_id` = {$pkid}

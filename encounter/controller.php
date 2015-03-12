@@ -2,10 +2,11 @@
 
 // create data collection to share information with the view
 $view = new DataCollector;
+$pageName = "Encounters";
 
 // set primary key id from get data
-if(isset($_GET[id])) {
-	$pkid = sanitize($_GET[id]);
+if(isset($_GET['id'])) {
+	$pkid = sanitize($_GET['id']);
 }
 
 if($pkid == 0) {
@@ -89,6 +90,7 @@ if($pkid == 0) {
 	
 				// ajax call to populate first section, which cascades to populate all sections on the page
 				buildSection('Story')
+				buildSection('Localmap')
 			}
 
 			console.log(" ... CHECK")

@@ -26,8 +26,18 @@ if($pkid > 0) {
 				<h6 class="statBlockSection">Cast</h6>
 				<div id="castSection"></div>
 
-				<h6 class="statBlockSection">Maps</h6>
+				<h6 class="statBlockSection">Regional Map</h6>
 				<div id="mapSection"></div>
+
+			</td>
+		</tr>
+	</table>
+	<table>
+		<tr>
+			<td class="statBlockDoubleWide statBlockSpacer">
+
+				<h6 class="statBlockSection">Local Maps</h6>
+				<div id="localmapSection"></div>
 
 			</td>
 		</tr>

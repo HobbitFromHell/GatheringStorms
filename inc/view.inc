@@ -552,89 +552,6 @@ function preecho($string)
 }
 
 /**
- * Display function makes CR human-readable
- *
- * Numbers below 1 are converted to fractions, as are used 
- * in Pathfinder.
- * @param number
- * @return string
- */
-function cr_display($paramCR)
-{
-	// ensure this is seen as a number
-	$paramCR *= 1;
-
-	switch($paramCR) {
-		case 0:  return "1/2";
-		case -1: return "1/3";
-		case -2: return "1/4";
-	}
-	return $paramCR;
-}
-
-/**
- * Renders an organization listing directly to screen
- *
- * Writes directly to the document and passes back the 
- * accumulated XP to calculate the total org XP and GP.
- * @param number (id for the organization)
- * @param number (id for the member currently being done)
- * @param object (organization data)
- * @return number (accumulated XP for each member so far)
- */
-function buildOrganization($paramOrganizationID, $paramMember, $paramOrganizationList)
-{
-	global $pkid;
-
-	echo("<table class=\"orgTable\"><tr class=\"orgTR\">");
-	if($pkid == $paramMember) {
-		// current character (highlight)
-		echo("<td class=\"orgThisMember\" colspan=\"99\">");
-	}
-	else {
-		// other character (link)
-		echo("<td class=\"orgMember\" colspan=\"99\">");
-		echo("<a class=\"noHighlight\" href=\"/character/?id={$paramOrganizationList['organization'][$paramOrganizationID]['members'][$paramMember]['id']}\" id=\"o{$paramOrganizationID}m{$paramMember}\">");
-	}
-	echo("{$paramOrganizationList['organization'][$paramOrganizationID]['members'][$paramMember]['title']}<br>");
-	echo("{$paramOrganizationList['organization'][$paramOrganizationID]['members'][$paramMember]['name']}<br>");
-	$var_cr = cr_display($paramOrganizationList['organization'][$paramOrganizationID]['members'][$paramMember]['cr']);
-	$varTotalXP += cr2xp($paramOrganizationList['organization'][$paramOrganizationID]['members'][$paramMember]['cr']);
-	echo("CR {$var_cr}");
-	if($pkid != $paramMember) {
-		echo("</a>");
-	}
-	echo("</td></tr><tr class=\"orgTR\"><td class=\"orgTD\"><br>");
-
-	// search for followers
-	for($i = 0; $i < count($paramOrganizationList['organization'][$paramOrganizationID]['master'][$paramMember]); $i++) {
-		echo("<td class=\"orgTD\">");
-		$varTotalXP += buildOrganization($paramOrganizationID, $paramOrganizationList['organization'][$paramOrganizationID]['master'][$paramMember][$i], $paramOrganizationList);
-		echo("</td>");
-	}
-
-	// add new follower button
-	if($pkid == $paramMember) {
-		echo("<td class=\"orgTD\">");
-		echo("<table class=\"orgTable\"><tr class=\"orgTR\">");
-		echo("<td class=\"orgMember\" colspan=\"99\" style=\"padding-top: 7px;\">");
-		echo("<form action=\"add/?id=0\" method=\"POST\" id=\"addNewMemberOrg{$paramOrganizationID}\">");
-		echo("<input type=\"hidden\" name=\"organization\" value=\"{$paramOrganizationList['organization'][$paramOrganizationID]['org_id']}\">");
-		echo("<input type=\"hidden\" name=\"master\" value=\"{$paramMember}\">");
-		echo("<input type=\"hidden\" name=\"name\" value=\"\">");
-		echo("<input type=\"hidden\" name=\"favoured_class\" value=\"COM\">");
-		echo("<input type=\"hidden\" name=\"location\" value=\"{$paramOrganizationList['organization'][$paramOrganizationID]['location']}\">");
-		echo("<input type=\"button\" onClick=\"$('#addNewMemberOrg{$paramOrganizationID}').submit();return false;\" value=\"+\"></form>");
-		echo("</td></tr></table>");
-		echo("</td>");
-	}
-
-	echo("</tr></table>");
-
-	return $varTotalXP;
-}
-
-/**
  * Produces a HTML-formatted list of characters
  *
  * Following Pathfinder format, the character "name" (also a
@@ -668,6 +585,35 @@ function buildCharList($paramCharList) // array of objects with id, name, option
 		}
 		$varOutput = substr($varOutput, 0, -1); // strip trailing space
 		$varOutput .= ")<br>";
+	}
+	return $varOutput;
+}
+
+/**
+ * Produces a HTML-formatted list of organizations
+ *
+ * Each member of the list is changed into a HTML-formatted 
+ * list giving "name" (also a link to the detail page which 
+ * requires "org_id") followed optionally by "location" or
+ * "location_id".
+ * @param object (list of locations data pulled from DB)
+ * @return string
+ */
+function buildOrgList($paramOrgList) // array of objects with org_id, name, optional location_id and location
+{
+	$varOutput = "";
+	for($i = 0; $i < count($paramOrgList); ++ $i) {
+		// name
+		$varOutput .= "<a href=\"/organization/?id={$paramOrgList[$i]['org_id']}\">{$paramOrgList[$i]['name']}</a>";
+		// location name
+		if($paramOrgList[$i]['location']) {
+			$varOutput .= " (" . $paramOrgList[$i]['location'] . ")";
+		}
+		// location id
+		else if($paramLocList[$i]['location_id']) {
+			$varOutput .= " (" . $paramOrgList[$i]['location_id'] . ")";
+		}
+		$varOutput .= "<br>";
 	}
 	return $varOutput;
 }
@@ -913,44 +859,9 @@ function drawHexMap ($paramX, $paramY, $paramRad, $paramLocation)
 function drawHexPart ($paramX = NULL, $paramY = NULL, $paramOffset = NULL, $paramLocation = NULL, $paramLeft = NULL)
 {
 	$ret = "";
-	// prepare background colour based on terrain
-	$varR = $varG = $varB = 9;
-
-	// convert terrain value to visual
-	if(isset($paramLocation['terrain'])) {
-		switch($paramLocation['terrain']) {
-			case "plains":              $varR += 0;  $varG += 0;  $varB -= 0;  break;
-			case "gentle hills":        $varR += 1;  $varG -= 1;  $varB -= 1;  break;
-			case "rugged hills":        $varR += 2;  $varG -= 2;  $varB -= 2;  break;
-			case "alpine mountain":     $varR += 3;  $varG -= 3;  $varB -= 3;  break;
-			case "rugged mountain":     $varR += 4;  $varG -= 4;  $varB -= 4;  break;
-			case "forbidding mountain": $varR += 5;  $varG -= 5;  $varB -= 5;  break;
-		}
-	}
-
-	// convert growth value to visual
-	if(isset($paramLocation['growth'])) {
-		switch($paramLocation['growth']) {
-			case "tundra":              $varR += 6;  $varG += 6;  $varB += 6;  break;
-			case "dessert":             $varR += 6;  $varG += 4;  $varB += 2;  break;
-			case "badlands":            $varR += 2;  $varG += 1;  $varB += 0;  break;
-			case "broken lands":        $varR += 2;  $varG += 0;  $varB -= 0;  break;
-	
-			case "grasslands":          $varR -= 0;  $varG += 6;  $varB -= 0;  break;
-			case "shrubland":           $varR -= 2;  $varG += 4;  $varB -= 2;  break;
-			case "sparse forest":       $varR -= 4;  $varG += 2;  $varB -= 4;  break;
-			case "dense forest":        $varR -= 6;  $varG += 0;  $varB -= 6;  break;
-			case "burned forest":       $varR -= 6;  $varG -= 4;  $varB -= 4;  break;
-	
-			case "farmland":            $varR += 0;  $varG += 9;  $varB += 1;  break;
-			case "moor":                $varR -= 2;  $varG += 6;  $varB += 3;  break;
-			case "swamp":               $varR -= 6;  $varG += 3;  $varB += 0;  break;
-			case "sea":                 $varR -= 6;  $varG -= 6;  $varB += 15; break;
-		}
-	}
 
 	// set colour
-	$varHexColour = dec2hex($varR) . dec2hex($varG) . dec2hex($varB);
+	$varHexColour = terrainColour($paramLocation['terrain'], $paramLocation['growth']);
 
 	// draw hex
 	if($paramX or $paramX === 0) {
@@ -1025,6 +936,51 @@ function drawHexPart ($paramX = NULL, $paramY = NULL, $paramOffset = NULL, $para
 		$ret .= "<td></td><td></td><td></td><td></td>\n";
 	}
 	$ret .= "</td>\n";
+
+	return $ret;
+}
+
+/**
+ *
+ */
+function terrainColour($paramTerrain = "", $paramGrowth = "")
+{
+	$varR = $varG = $varB = 9;
+
+	// convert terrain value to visual
+	switch($paramTerrain) {
+		case "plains":              $varR += 0;  $varG += 0;  $varB -= 0;  break;
+		case "gentle hills":        $varR += 1;  $varG -= 1;  $varB -= 1;  break;
+		case "rugged hills":        $varR += 2;  $varG -= 2;  $varB -= 2;  break;
+		case "alpine mountain":     $varR += 3;  $varG -= 3;  $varB -= 3;  break;
+		case "rugged mountain":     $varR += 4;  $varG -= 4;  $varB -= 4;  break;
+		case "forbidding mountain": $varR += 5;  $varG -= 5;  $varB -= 5;  break;
+	}
+
+	// convert growth value to visual
+	switch($paramGrowth) {
+		// red
+		case "tundra":              $varR += 6;  $varG += 6;  $varB += 6;  break;
+		case "dessert":             $varR += 6;  $varG += 4;  $varB += 2;  break;
+		case "badlands":            $varR += 2;  $varG += 1;  $varB += 0;  break;
+		case "broken lands":        $varR += 2;  $varG += 0;  $varB -= 0;  break;
+
+		// green
+		case "grasslands":          $varR -= 0;  $varG += 6;  $varB -= 0;  break;
+		case "shrubland":           $varR -= 2;  $varG += 4;  $varB -= 2;  break;
+		case "sparse forest":       $varR -= 4;  $varG += 2;  $varB -= 4;  break;
+		case "dense forest":        $varR -= 6;  $varG += 0;  $varB -= 6;  break;
+		case "burned forest":       $varR -= 6;  $varG -= 4;  $varB -= 4;  break;
+
+		// blue
+		case "farmland":            $varR += 0;  $varG += 9;  $varB += 1;  break;
+		case "moor":                $varR -= 2;  $varG += 6;  $varB += 3;  break;
+		case "swamp":               $varR -= 6;  $varG += 3;  $varB += 0;  break;
+		case "sea":                 $varR -= 6;  $varG -= 6;  $varB += 15; break;
+	}
+
+	// set colour
+	$ret = dec2hex($varR) . dec2hex($varG) . dec2hex($varB);
 
 	return $ret;
 }

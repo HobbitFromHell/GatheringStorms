@@ -15,14 +15,16 @@ if (!($pkid > 0 and $pkid < 65000)) {
 // //////
 
 // custom update (post_data function only uses insert on duplicate key update, which does not function here)
-if (isset($_POST[id])) {
+if (isset($_POST['id'])) {
 	// post_data("t_characters", "id", "id", Array("description"));
-	$postDescription = sanitize($_POST[description]);
-	$postLocationID = sanitize($_POST[location]);
+	$postDescription = sanitize($_POST['description']);
+	$postLocationID = sanitize($_POST['location']);
+	$postGodID = sanitize($_POST['god_id']);
 	DataConnector::updateQuery("
 		 UPDATE t_characters
 		    SET `description` = '{$postDescription}',
-		        `location_id` = '{$postLocationID}'
+		        `location_id` = '{$postLocationID}',
+		        `god_id` = '{$postGodID}'
 		  WHERE `id` = {$pkid}
 	");
 }
@@ -31,9 +33,10 @@ if (isset($_POST[id])) {
 // select
 // //////
 
-$view->characterDescription[description] = DataConnector::selectQuery("
+$view->characterDescription['description'] = DataConnector::selectQuery("
 	 SELECT pc.`description` AS `name`,
 	        pc.`location_id` AS `location`,
+	        pc.`god_id`      AS `god_id`,
 	         l.`name`        AS `loc_name`
 	   FROM t_characters pc
 	   LEFT JOIN t_locations l
@@ -41,10 +44,38 @@ $view->characterDescription[description] = DataConnector::selectQuery("
 	  WHERE pc.`id` = {$pkid}
 ");
 
+// select god details
+if($view->characterDescription['description']['god_id']) {
+	$view->characterDescription['description']['god'] = DataConnector::selectQuery("
+		 SELECT g.`name`        AS `name`,
+		        g.`nickname`    AS `description`
+		   FROM `t_gods` g
+		  WHERE g.`id` = {$view->characterDescription['description']['god_id']}
+	");
+}
+else {
+	$view->characterDescription['description']['god']['name'] = "";
+}
+
+// build god list
+$j = DataConnector::selectQuery("
+	 SELECT g.`id`          AS `id`,
+	        g.`name`        AS `name`
+	   FROM t_gods g
+	  ORDER BY g.`name`
+");
+while($j) {
+//	if($j['id'] == $view->characterDescription['description']['god_id']) {
+//		$view->god = $j['name'];
+//	}
+	$view->characterDescription['description']['god']['list'][] = $j;
+	$j = DataConnector::selectQuery();
+}
+
 // strip X and Y numeric location values from location_id, form: "[-]#0x[-]#0"
-$varXLoc = stripos($view->characterDescription[description][location], "x");
-$varXCo = substr($view->characterDescription[description][location], 0, $varXLoc);
-$varYCo = substr($view->characterDescription[description][location], $varXLoc + 1);
+$varXLoc = stripos($view->characterDescription['description']['location'], "x");
+$varXCo = substr($view->characterDescription['description']['location'], 0, $varXLoc);
+$varYCo = substr($view->characterDescription['description']['location'], $varXLoc + 1);
 $varCoordinates = "";
 $varHexSize = 3;
 
@@ -69,10 +100,10 @@ $j = DataConnector::selectQuery("
 	  WHERE l.`id` IN ({$varCoordinates})
 ");
 while ($j) {
-	$varTmpXloc = stripos($j[location], "x");
-	$varTmpXco = substr($j[location], 0, $varTmpXloc);
-	$varTmpYco = substr($j[location], $varTmpXloc + 1);
-	$view->characterDescription[location][$varTmpXco][$varTmpYco] = $j;
+	$varTmpXloc = stripos($j['location'], "x");
+	$varTmpXco = substr($j['location'], 0, $varTmpXloc);
+	$varTmpYco = substr($j['location'], $varTmpXloc + 1);
+	$view->characterDescription['location'][$varTmpXco][$varTmpYco] = $j;
 	$j = DataConnector::selectQuery();
 }
 
@@ -81,7 +112,7 @@ while ($j) {
 // communicate with parent page
 // ////////////////////////////
 
-if (!isset($_POST[id])) { // only during initial rendering should the next subsection be called
+if (!isset($_POST['id'])) { // only during initial rendering should the next subsection be called
 	echo "<script>\n";
 	echo "buildSection('Organization')\n";
 	echo "</script>\n";

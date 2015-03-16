@@ -2,6 +2,7 @@
 
 // create data collection to share information with the view
 $view = new DataCollector;
+$pageName = "Character Sheet";
 
 if($pkid == 0) {
 
@@ -69,7 +70,7 @@ if($pkid == 0) {
 		// character sheet object
 		var charSheet = {
 			race:                 '',
-			type:                 '',
+			raceType:             '',
 			cr:                   0,
 			charLevel:            0,
 			bonusHP:              0,
@@ -109,6 +110,19 @@ if($pkid == 0) {
 					case 'Large':  return 1
 					default:       return 0
 				}
+			},
+
+			// calculate number of arcane spellcasting levels
+			buildCasterLevel: function()
+			{
+				return Math.max(charSheet.getNumber('class_level.BRD'),
+				                charSheet.getNumber('class_level.CLR'),
+				                charSheet.getNumber('class_level.DRD'),
+				                charSheet.getNumber('class_level.PAL') - 3,
+				                charSheet.getNumber('class_level.RGR') - 3,
+				                charSheet.getNumber('class_level.SOR'),
+				                charSheet.getNumber('class_level.WIZ')
+				               )
 			},
 
 			// convert double-average notation to XdX, also adjutsing for size
@@ -237,7 +251,7 @@ if($pkid == 0) {
 			// update screen with senses and perception
 			buildSenses: function ()
 			{
-				$('#calcSenses').html(charSheet.out('', charSheet.getValue('adjustments.race.lightSensitivity'), '; ', 1)
+				$('#calcSenses').html(charSheet.out('', charSheet.getValue('adjustments.racial_trait.lightSensitivity'), '; ', 1)
 				                    + charSheet.getTotal('senses').join('; '))
 			},
 
@@ -276,7 +290,7 @@ if($pkid == 0) {
 				tmpSPDesc  = charSheet.getValue('adjustments.class.sp')
 				tmpSPDesc += charSheet.out(' +', charSheet.getValue('adjustments.ability.sp'), ' Int', 1)
 				tmpSPDesc += charSheet.out(' +', charSheet.getValue('adjustments.feat.sp'), ' feats', 1)
-				tmpSPDesc += charSheet.out(' +', charSheet.getValue('adjustments.race.sp'), ' traits', 1)
+				tmpSPDesc += charSheet.out(' +', charSheet.getValue('adjustments.racial_trait.sp'), ' traits', 1)
 				tmpSPDesc += charSheet.out(' +', charSheet.getValue('bonusSP'), ' favoured class', 1)
 
 				// format
@@ -294,7 +308,7 @@ if($pkid == 0) {
 
 				// calculate fp description
 				tmpFPDesc  = charSheet.getValue('adjustments.original.fp')
-				tmpFPDesc += charSheet.out(' +', charSheet.getValue('adjustments.race.fp'), ' traits', 1)
+				tmpFPDesc += charSheet.out(' +', charSheet.getValue('adjustments.racial_trait.fp'), ' traits', 1)
 				tmpFPDesc += charSheet.out(' +', charSheet.getValue('adjustments.class.fp'), ' class features', 1)
 
 				// format
@@ -373,7 +387,7 @@ if($pkid == 0) {
 			buildCMB: function ()
 			{
 				tmpCMB = charSheet.getTotal('bab')
-				       + charSheet.getTotal('cmd')
+				       + charSheet.getTotal('cmb')
 
 				// update screen
 				$('#calcCMB').text(tmpCMB)
@@ -383,6 +397,22 @@ if($pkid == 0) {
 			buildArmour: function ()
 			{
 				tmpArDesc = ''
+
+				// check for improved shield bash
+				if(!charSheet.getValue('shield') && charSheet.getTotal('impShieldBash')) {
+					if(charSheet.getValue('offhand.armour_category') == 'Shield') {
+						// copy shield to off-hand weapon
+						charSheet.shield = charSheet.getValue('offhand')
+						// shield magic does not affect attack or damage
+						charSheet.offhand.to_hit_mod = charSheet.offhand.damage_mod = 0;
+					}
+					else if(charSheet.getValue('melee.armour_category') == 'Shield') {
+						// copy shield to melee weapon
+						charSheet.shield = charSheet.getValue('melee')
+						// shield magic does not affect attack or damage
+						charSheet.melee.to_hit_mod = charSheet.melee.damage_mod = 0;
+					}
+				}
 
 				// calculate shield description
 				if(charSheet.getValue('shield')) {
@@ -582,6 +612,22 @@ if($pkid == 0) {
 			{
 				var varDescription = ''
 
+				// check for improved shield bash
+				if(charSheet.getTotal('impShieldBash')) {
+					if(!charSheet.getValue('melee')) {
+						// copy shield to melee weapon
+						charSheet.melee = charSheet.getValue('shield')
+						// shield magic does not affect attack or damage
+						charSheet.melee.to_hit_mod = charSheet.melee.damage_mod = 0
+					}
+					else if(!charSheet.getValue('offhand') && charSheet.getValue('melee.armour_category') != 'Shield') {
+						// copy shield to offhand weapon
+						charSheet.offhand = charSheet.getValue('shield')
+						// shield magic does not affect attack or damage
+						charSheet.offhand.to_hit_mod = charSheet.offhand.damage_mod = 0
+					}
+				}
+
 				// calculate unarmed strike damage for Medium size
 				switch(charSheet.getNumber('class_level.MNK')) {
 					case '1':
@@ -665,8 +711,9 @@ if($pkid == 0) {
 					   !charSheet.getValue('shield') &&
 					   !charSheet.getValue('offhand') &&
 					   !charSheet.getValue('adjustments.feat.improvisedShield'))) {
-					  // add half str bonus (min +1)
+					  // add half str bonus (min +1) and power attack bonus
 						temp += Math.max(1, Math.floor(charSheet.bonus(charSheet.getTotal('str'), 1) / 2))
+						      + charSheet.getTotal('powerAttack') * 1
 					}
 
 					// damage bonus calculator
@@ -826,11 +873,14 @@ if($pkid == 0) {
 				if(charSheet.getTotal('weaponFocus')) {
 					for(i = 0; i < charSheet.getTotal('weaponFocus').length; i++) {
 						// if weapon contains weapon focus text: add bonus
-						if(paramWeapon.indexOf(charSheet.getTotal('weaponFocus')) > -1) {
+						if(paramWeapon.toLowerCase().indexOf(charSheet.getTotal('weaponFocus')[i].toLowerCase()) > -1) {
 							tmpAttackBonus++
 						}
 					}
 				}
+
+				// power attack
+				tmpAttackBonus -= charSheet.getTotal('powerAttack') * 1
 
 				// ranged only modifiers
 				if(paramIsRanged) {
@@ -903,11 +953,14 @@ if($pkid == 0) {
 				if(charSheet.getTotal('weaponSpec')) {
 					for(i = 0; i < charSheet.getTotal('weaponSpec').length; i++) {
 						// if weapon contains weapon specialization text: add bonus
-						if(paramWeapon.indexOf(charSheet.getTotal('weaponSpec')) > -1) {
-							tmpAttackBonus++
+						if(paramWeapon.toLowerCase().indexOf(charSheet.getTotal('weaponSpec')[i].toLowerCase()) > -1) {
+							tmpDamageBonus += 2
 						}
 					}
 				}
+
+				// power attack
+				tmpDamageBonus += 2 * charSheet.getTotal('powerAttack') * 1
 
 				// ranged only modifiers
 				if(paramIsRanged) {
@@ -1086,6 +1139,9 @@ if($pkid == 0) {
 				$('#calcDomainPowers').html(charSheet.out(' <b>Domain Powers</b> ', 
 				                                          charSheet.getTotal('domainPower').join(', '), '', 1))
 
+				// ftr
+				varSQDesc += charSheet.out('; Armour Training +', charSheet.adjustments.class.armourTraining, '', 1)
+
 				// mnk
 				if(charSheet.getNumber('class_level.MNK') == 20) {
 					varSQDesc += '; ' + charSheet.adjustments.class.slowFallDesc + ' any distance';
@@ -1142,12 +1198,20 @@ if($pkid == 0) {
 				// loop through each class' spell list
 				for(var tmpClass in charSheet.getValue('spells')) {
 					if(tmpClass != 'DOMAIN') {
-						// calculate concentration score and update title
+						// calculate concentration score
 						tmpConc = charSheet.getValue('spells.' + tmpClass + '.concentration')
 						        + charSheet.getTotal('concentration')
+
+						// calculate casting level
+						tmpCastingLevel = charSheet.getNumber('class_level.' + tmpClass)
+						if(tmpClass == 'PAL' || tmpClass == 'RGR') {
+							tmpCastingLevel -= 3
+						}
+
+						// update title
 						$('#calc' + tmpClass + 'Known').html('<br><b>' + charSheet.getValue('spells.' + tmpClass + '.title') 
 						                                   + '</b> (CL ' 
-						                                   + charSheet.ordinal(charSheet.getNumber('class_level.' + tmpClass)) 
+						                                   + charSheet.ordinal(tmpCastingLevel) 
 						                                   + '; concentration ' + tmpConc + ')')
 						$('#edit' + tmpClass + 'Known').html('<br><b>' + charSheet.getValue('spells.' + tmpClass + '.title') + '</b>')
 
@@ -1306,7 +1370,7 @@ if($pkid == 0) {
 			addValue: function (param1, param2, param3, param4, param5)
 			{
 				// if four-part adjustment (e.g. feat.skill.Perform (act))
-				if(param5) {
+				if(param5 !== undefined) {
 					// setValue for adjustment
 					paramBase = charSheet.adjustments[param1][param2][param3]
 					varCheck = 'charSheet.adjustments.' + param1 + '.' + param2 + '.' + param3
@@ -1318,7 +1382,7 @@ if($pkid == 0) {
 					paramValue = param5
 				}
 				// if three-part adjustment (e.g. feat.skill.Bluff)
-				else if(param4) {
+				else if(param4 !== undefined) {
 					// setValue for adjustment
 					paramBase = charSheet.adjustments[param1][param2]
 					varCheck = 'charSheet.adjustments.' + param1 + '.' + param2
@@ -1330,7 +1394,7 @@ if($pkid == 0) {
 					paramValue = param4
 				}
 				// if two-part adjustment (e.g. feat.acDodge)
-				else if(param3) {
+				else if(param3 !== undefined) {
 					// setValue for adjustment
 					// if adjustment does not exist: return fail
 					if(!charSheet.adjustments[param1]) {
@@ -1342,7 +1406,7 @@ if($pkid == 0) {
 					paramValue = param3
 				}
 				// if one-part adjustment (e.g. charLevel)
-				else if(param2) {
+				else if(param2 !== undefined) {
 					// setValue for main sheet
 					paramBase = charSheet
 					varCheck = ''
@@ -1464,7 +1528,9 @@ if($pkid == 0) {
 			this.weaponCrit     = []
 			this.weaponGroup    = []
 			this.weaponMastery  = ''
+			this.powerAttack    = 0
 			this.twoWeapon      = 0
+			this.impShieldBash  = 0
 			this.twoWeaponDef   = 0
 			this.unarmed        = 0
 			this.flurryOfBlows  = 0
@@ -1631,14 +1697,14 @@ if($pkid == 0) {
 			                         'gold':     '',
 			                        }
 		// tracking objects
-		charSheet.adjustments = {'original': new CharSheetAdjustments(),
-			                       'template': new CharSheetAdjustments(),
-			                       'ability':  new CharSheetAdjustments(),
-			                       'race':     new CharSheetAdjustments(),
-			                       'class':    new CharSheetAdjustments(),
-			                       'feat':     new CharSheetAdjustments(),
-			                       'skill':    new CharSheetAdjustments(),
-			                       'gear':     new CharSheetAdjustments(),
+		charSheet.adjustments = {'original':     new CharSheetAdjustments(),
+			                       'template':     new CharSheetAdjustments(),
+			                       'ability':      new CharSheetAdjustments(),
+			                       'racial_trait': new CharSheetAdjustments(),
+			                       'class':        new CharSheetAdjustments(),
+			                       'feat':         new CharSheetAdjustments(),
+			                       'skill':        new CharSheetAdjustments(),
+			                       'gear':         new CharSheetAdjustments(),
 			                      }
 		// edit objects
 		charSheet.edit = []
@@ -1649,7 +1715,7 @@ if($pkid == 0) {
 			console.log('function calcMain()')
 
 			// add feats based on character level
-			charSheet.addValue('original', 'fp', Math.ceil(charSheet.getNumber('charLevel') / 2))
+			charSheet.adjustments.original.fp = Math.ceil(charSheet.getNumber('charLevel') / 2)
 
 			// recalculate sections
 			calcRacialtraits()
@@ -1692,7 +1758,7 @@ if($pkid == 0) {
 			charSheet.addValue('ability', 'cmb', temp)
 
 			// dex (with load penalty)
-			temp = charSheet.bonus(charSheet.getTotal('dex'), 1)
+			temp = charSheet.bonus(charSheet.getTotal('dex'))
 			charSheet.addValue('ability', 'acDex', temp)
 			charSheet.addValue('ability', 'initiative', temp)
 			charSheet.addValue('ability', 'cmd', temp)
@@ -1791,7 +1857,7 @@ if($pkid == 0) {
 					varFeatDetail    = charSheet.getValue('feats.' + varFeatLoop + '.detail')
 
 					// keep count of feats already selected
-					charSheet.fp_used++
+					charSheet.fp_used ++
 
 					switch(varFeatName) {
 
@@ -1840,7 +1906,7 @@ if($pkid == 0) {
 							charSheet.addValue('feat', 'hp', 5)
 							break
 						case 'Daylight Adaptation':
-							charSheet.adjustments.race.lightSensitivity = ''
+							charSheet.adjustments.racial_trait.lightSensitivity = ''
 							break
 						case 'Discipline':
 							charSheet.addValue('feat', 'saveWill', 2)
@@ -1933,7 +1999,10 @@ if($pkid == 0) {
 							break
 						case 'Mind Over Body':
 							charSheet.addValue('feat', 'hp', (1 * varFeatDetail) - charSheet.bonus(charSheet.getTotal('con')))
-							if(is_arcane_spellcaster()) {
+							// only for arcane spellcasters
+							if(charSheet.getNumber('class_level.SOR')
+				      || charSheet.getNumber('class_level.WIZ')
+				      || charSheet.getNumber('class_level.BRD')) {
 								charSheet.addValue('feat', 'acInsight', 1)
 							}
 							break
@@ -2077,8 +2146,7 @@ if($pkid == 0) {
 							charSheet.addValue('feat', 'rangedDmg', 1)
 							break
 						case 'Power Attack':
-							charSheet.addValue('feat', 'meleeAtk', -1 * varFeatDetail)
-							charSheet.addValue('feat', 'meleeDmg', 2 * varFeatDetail)
+							charSheet.addValue('feat', 'powerAttack', varFeatDetail)
 							break
 						case 'Rapid Reload':
 							charSheet.addValue('feat', 'rapidReload', varFeatDetail)
@@ -2103,6 +2171,9 @@ if($pkid == 0) {
 						case 'Greater Two-Weapon Fighting':
 						case 'Two-Weapon Fighting':
 							charSheet.addValue('feat', 'twoWeapon', 1)
+							break
+						case 'Improved Shield Bash':
+							charSheet.addValue('feat', 'impShieldBash', 1)
 							break
 						case 'Weapon Finesse':
 							charSheet.addValue('feat', 'weaponFinesse', 1)
@@ -2204,6 +2275,9 @@ if($pkid == 0) {
 							break
 
 						// miscellany
+						case 'Combat Casting':
+							charSheet.addValue('feat', 'concentration', 4)
+							break
 						case 'Improved Channel':
 							charSheet.addValue('feat', 'channelDC', 2)
 							break
@@ -2228,7 +2302,6 @@ if($pkid == 0) {
 	//				case 'Channel Smite': break; // * Channel energy class feature Channel energy through your attack
 	//				case 'Cleave': break; //* Power Attack Make an additional attack if the first one hits
 	//				case 'Great Cleave': break; //* Cleave, base attack bonus +4 Make an additional attack after each attack hits
-	//				case 'Combat Casting': break; //  — +4 bonus on concentration checks for defensive casting
 	//				case 'Combat Reflexes': break; // * Make additional attacks of opportunity
 	//				case 'Command Undead': break; //  Channel negative energy class feature Channel energy can be used to control undead
 	//				case 'Critical Focus': break; // * Base attack bonus +9: +4 bonus on attack rolls made to confirm critical hits
@@ -2290,7 +2363,6 @@ if($pkid == 0) {
 	//					case 'Shatter Defenses': break; //* Dazzling Display, base attack bonus +6 Hindered foes are flat-footed
 	//					case 'Shield Proficiency': break; // — No penalties on attack rolls when using a shield
 	//					case 'Tower Shield Proficiency': break; //* Shield Proficiency No penalties on attack rolls when using a tower shield
-	//					case 'Improved Shield Bash': break; //* Shield Proficiency Keep your shield bonus when shield bashing
 	//					case 'Shield Slam': break; //* Improved Shield Bash, Two-Weapon Fighting, Free bull rush with a bash attack base attack bonus +6
 	//					case 'Shield Master': break; //* Shield Slam, base attack bonus +11 No two-weapon penalties when attacking with a shield
 	//					case 'Greater Shield Focus': break; //* Shield Focus, 8th-level fighter Gain a +1 bonus to your AC when using a shield
@@ -2345,8 +2417,10 @@ if($pkid == 0) {
 			}
 
 			// recalculate sections
+			charSheet.buildAC()
 			charSheet.buildSQ()
 			charSheet.buildFP()
+			charSheet.buildSaves()
 			calcSkills()
 			calcDefense()
 			calcOffense()
@@ -2364,6 +2438,7 @@ if($pkid == 0) {
 
 			// set default values for skills
 			charSheet.sp_used = 0
+			var tmpPerception = 0
 
 			// if skills are loaded: loop through each skill
 			if(charSheet.getValue('skills.0.name')) {
@@ -2415,6 +2490,16 @@ if($pkid == 0) {
 						}
 					}
 
+					// note perception
+					if(tmpSkillName == 'Perception') {
+						tmpPerception = tmpSkillTotal
+					}
+
+					// note linguistics
+					if(tmpSkillName == 'Linguistics') {
+						charSheet.addValue('skill', 'lp', tmpSkillRanks)
+					}
+
 					// update screen
 					$('#spantotal' + tmpID).text(10 + tmpSkillTotal)
 					$('#total' + tmpID).prop('value', 10 + tmpSkillTotal)
@@ -2422,12 +2507,11 @@ if($pkid == 0) {
 			}
 
 			// guarantee perception is available
-			if(!charSheet.getValue('adjustments.skill.skill.Perception')) {
-				charSheet.adjustments.ability.skill.Perception = charSheet.bonus(charSheet.getTotal('wis'))
-				charSheet.adjustments.skill.skill.Perception = 10
+			if(!tmpPerception) {
+				tmpPerception = charSheet.bonus(charSheet.getTotal('wis'))
 			}
 			// add perception to senses
-			charSheet.addValue('skill', 'senses', 'Perception ' + charSheet.getTotal('skill.Perception'))
+			charSheet.addValue('skill', 'senses', 'Perception ' + (10 + tmpPerception))
 
 			// recalculate sections
 			charSheet.buildSP()
@@ -2450,7 +2534,7 @@ if($pkid == 0) {
 						tmpIlliterateBonus = 1
 					}
 					else {
-						charSheet.lp_used++
+						++ charSheet.lp_used
 					}
 				}
 			}
@@ -2466,13 +2550,13 @@ if($pkid == 0) {
 				tmpLPDesc += ' +' + charSheet.bonus(charSheet.getTotal('int')) + ' Int'
 			}
 			if(charSheet.getValue('adjustments.skill.lp')) {
-				tmpLPDesc += ' +' + charSheet.getValue('lp_skills') + ' Linguistics'
+				tmpLPDesc += ' +' + charSheet.getValue('adjustments.skill.lp') + ' Linguistics'
 			}
-			if(charSheet.getValue('adjustments.race.lp')) {
-				tmpLPDesc += ' +' + charSheet.getValue('lp_traits') + ' traits'
+			if(charSheet.getValue('adjustments.racial_trait.lp')) {
+				tmpLPDesc += ' +' + charSheet.getValue('adjustments.racial_trait.lp') + ' traits'
 			}
 			if(charSheet.getValue('adjustments.class.lp')) {
-				tmpLPDesc += ' +' + charSheet.getValue('lp_features') + ' features'
+				tmpLPDesc += ' +' + charSheet.getValue('adjustments.class.lp') + ' features'
 			}
 			tmpLPDesc += ')'
 
@@ -2485,9 +2569,10 @@ if($pkid == 0) {
 		function calcRacialtraits()
 		{
 			// reset racial trait adjustments
-			charSheet.adjustments.race = new CharSheetAdjustments()
+			charSheet.adjustments.racial_trait = new CharSheetAdjustments()
 
 			// loop through each racial trait
+			if(charSheet.getValue('racial_traits'))
 			for(i = 0, varRacialTraits = ''; i < charSheet.getValue('racial_traits').length; i++) {
 				if(charSheet.getValue('racial_traits.' + i)) {
 
@@ -2504,99 +2589,104 @@ if($pkid == 0) {
 
 						// size
 						// TO DO: move to later section, so size can still be modified by template, etc.
-						case 'Small':
-							charSheet.addValue('race', 'encumbrance', charSheet.getValue('adjustments.ability.encumbrance') * -5 / 4)
 						case 'Large':
-							charSheet.addValue('race', 'encumbrance', charSheet.getValue('adjustments.ability.encumbrance'))
-						case 'Small':
 						case 'Medium':
-							charSheet.addValue('race', 'size', varRacialTraitName)
-							charSheet.addValue('race', 'skill', 'Stealth', charSheet.sizeBonus() * -4)
-							charSheet.addValue('race', 'skill', 'Fly', charSheet.sizeBonus() * -2)
-							charSheet.addValue('race', 'cmb', charSheet.sizeBonus())
-							charSheet.addValue('race', 'cmd', charSheet.sizeBonus())
+						case 'Small':
+							charSheet.addValue('racial_trait', 'size', varRacialTraitName)
+							charSheet.addValue('racial_trait', 'skill', 'Stealth', charSheet.sizeBonus() * -4)
+							charSheet.addValue('racial_trait', 'skill', 'Fly', charSheet.sizeBonus() * -2)
+							charSheet.addValue('racial_trait', 'cmb', charSheet.sizeBonus())
+							charSheet.addValue('racial_trait', 'cmd', charSheet.sizeBonus())
+							if(varRacialTraitName == 'Small') {
+								charSheet.addValue('racial_trait', 'encumbrance', 
+								                   charSheet.getValue('adjustments.ability.encumbrance') / -4)
+							}
+							if(varRacialTraitName == 'Large') {
+								charSheet.addValue('racial_trait', 'encumbrance', 
+								                   charSheet.getValue('adjustments.ability.encumbrance'))
+							}
 							break
 
 						// senses
 						case 'Darkvision (60 ft.)':
 						case 'Darkvision (120 ft.)':
 						case 'Low-Light Vision':
-							charSheet.addValue('race', 'senses', varRacialTraitHTML)
+							charSheet.addValue('racial_trait', 'senses', varRacialTraitHTML)
 							break
 						case 'Light Sensitivity':
-							charSheet.adjustments.race.lightSensitivity = varRacialTraitHTML
+							charSheet.adjustments.racial_trait.lightSensitivity = varRacialTraitHTML
 							break
 
 						// defense
 
 						// saving throws
 						case 'Hobbit Luck':
-							charSheet.addValue('race', 'saveFort', 1)
-							charSheet.addValue('race', 'saveRef', 1)
-							charSheet.addValue('race', 'saveWill', 1)
+							charSheet.addValue('racial_trait', 'saveFort', 1)
+							charSheet.addValue('racial_trait', 'saveRef', 1)
+							charSheet.addValue('racial_trait', 'saveWill', 1)
 							break
 						case 'Fortunate':
-							charSheet.addValue('race', 'saveFort', 2)
-							charSheet.addValue('race', 'saveRef', 2)
-							charSheet.addValue('race', 'saveWill', 2)
+							charSheet.addValue('racial_trait', 'saveFort', 2)
+							charSheet.addValue('racial_trait', 'saveRef', 2)
+							charSheet.addValue('racial_trait', 'saveWill', 2)
 							break
 						case 'Defensive Training':
-							charSheet.addValue('race', 'sd', 'defensive training (+4 dodge bonus to AC vs. giants)')
+							charSheet.addValue('racial_trait', 'sd', 'defensive training (+4 dodge bonus to AC vs. giants)')
 							break
 						case 'Illusion Resistance':
-							charSheet.addValue('race', 'save', '+2 vs. illusions')
+							charSheet.addValue('racial_trait', 'save', '+2 vs. illusions')
 							break
 						case 'Hardy':
-							charSheet.addValue('race', 'save', '+2 vs. poison, spells, and spell-like abilities')
+							charSheet.addValue('racial_trait', 'save', '+2 vs. poison, spells, and spell-like abilities')
 							break
 
 						// sd
 						case 'Stability':
-							charSheet.addValue('race', 'sd', 'stability (+4 vs. bull rush and trip)')
+							charSheet.addValue('racial_trait', 'sd', 'stability (+4 vs. bull rush and trip)')
 							break
 
 						// immune
 						case 'Elven Immunities':
 							charSheet.addValue('feat', 'immune', 'sleep')
-							charSheet.addValue('race', 'save', '+2 vs. enchantments')
+							charSheet.addValue('racial_trait', 'save', '+2 vs. enchantments')
 							break
 
 						// offense
 
 						// speed
 						case 'Normal Speed':
-							charSheet.adjustments.race.baseSpeed = 30
+							charSheet.adjustments.racial_trait.baseSpeed = 30
 							break
 						case 'Slow and Steady':
-							charSheet.addValue('race', 'noSpeedRestrict', 1)
+							charSheet.addValue('racial_trait', 'noSpeedRestrict', 1)
 							// continue...
 						case 'Slow Speed':
-							charSheet.adjustments.race.baseSpeed = 20
+							charSheet.adjustments.racial_trait.baseSpeed = 20
 							break
 	
 						// sa
 						case 'Gnome Magic':
 							// only if cha is 11 or higher
 							if(charSheet.getTotal('cha') > 10) {
-								charSheet.addValue('race', 'spellLike', 'Dancing Lights')
-								charSheet.addValue('race', 'spellLike', 'Ghost Sounds')
-								charSheet.addValue('race', 'spellLike', 'Prestidigitation')
-								charSheet.addValue('race', 'spellLike', 
+								charSheet.addValue('racial_trait', 'spellLike', 'Dancing Lights')
+								charSheet.addValue('racial_trait', 'spellLike', 'Ghost Sounds')
+								charSheet.addValue('racial_trait', 'spellLike', 'Prestidigitation')
+								charSheet.addValue('racial_trait', 'spellLike', 
 								                   'Speak with Animals (1/day, CL ' 
 								                   + charSheet.ordinal(charSheet.getNumber('charLevel')) + ')')
 							}
 							break
 						case 'Gnome Hatred':
-							charSheet.addValue('race', 'sa', '+1 on attack roles against goblin and reptilian humanoids')
+							charSheet.addValue('racial_trait', 'sa', '+1 on attack roles against goblin and reptilian humanoids')
 							break
 						case 'Shield Dwarf Hatred':
-							charSheet.addValue('race', 'sa', '+1 on attack roles against goblinoid and orc humanoids')
+							charSheet.addValue('racial_trait', 'sa', '+1 on attack roles against goblinoid and orc humanoids')
 							break
 
 						// feats
 
 						case 'Bonus Feat':
-							charSheet.addValue('race', 'fp', 1)
+							charSheet.addValue('racial_trait', 'fp', 1)
 							break
 						case 'Adaptability':
 							// TO DO: second favoured class
@@ -2605,26 +2695,26 @@ if($pkid == 0) {
 						// skills
 
 						case 'Skilled':
-							charSheet.addValue('race', 'sp', charSheet.getNumber('charLevel'))
+							charSheet.addValue('racial_trait', 'sp', charSheet.getNumber('charLevel'))
 							break
 						case 'Keen Senses':
-							charSheet.addValue('race', 'skill', 'Perception', 2)
+							charSheet.addValue('racial_trait', 'skill', 'Perception', 2)
 							break
 						case 'Sure-Footed':
-							charSheet.addValue('race', 'skill', 'Acrobatics', 2)
-							charSheet.addValue('race', 'skill', 'Climb', 2)
+							charSheet.addValue('racial_trait', 'skill', 'Acrobatics', 2)
+							charSheet.addValue('racial_trait', 'skill', 'Climb', 2)
 							break
 						case 'Svirfneblin Skill':
-							charSheet.addValue('race', 'skill', 'Stealth', 2)
-							charSheet.addValue('race', 'skill', 'Craft (alchemy)', 2)
-							charSheet.addValue('race', 'skill', 'Perception', 2)
+							charSheet.addValue('racial_trait', 'skill', 'Stealth', 2)
+							charSheet.addValue('racial_trait', 'skill', 'Craft (alchemy)', 2)
+							charSheet.addValue('racial_trait', 'skill', 'Perception', 2)
 							break
 						case 'Intimidating':
-							charSheet.addValue('race', 'skill', 'Intimidate', 2)
+							charSheet.addValue('racial_trait', 'skill', 'Intimidate', 2)
 							break
 						case 'Obsessive':
-							charSheet.addValue('race', 'skill', varRacialTraitDetail, 2)
-							charSheet.addValue('race', 'sq', varRacialTraitHTML + ' (' + varRacialTraitDetail + ')')
+							charSheet.addValue('racial_trait', 'skill', varRacialTraitDetail, 2)
+							charSheet.addValue('racial_trait', 'sq', varRacialTraitHTML + ' (' + varRacialTraitDetail + ')')
 							// edit
 							$('#editRacialTraits').html('Obsession <input type=\'text\' id=\'racialtrait' + varRacialTraitID + '\' value="' + varRacialTraitDetail + '"><br>')
 							break
@@ -2632,7 +2722,7 @@ if($pkid == 0) {
 						// languages
 
 						case 'Racial Language':
-							charSheet.addValue('race', 'lp', 1)
+							charSheet.addValue('racial_trait', 'lp', 1)
 							break
 
 						// sq
@@ -2640,17 +2730,17 @@ if($pkid == 0) {
 						case 'Elven Magic':
 						case 'Greed':
 						case 'Stonecunning':
-							charSheet.addValue('race', 'sq', varRacialTraitHTML)
+							charSheet.addValue('racial_trait', 'sq', varRacialTraitHTML)
 							break
 					}
 
 					// add to list for racial traits (diagnostic section)
 					varRacialTraits += ', ' + varRacialTraitHTML
 				}
-			}
 
-			// update screen (diagnostic section)
-			$('#calcRacialTraits').html(varRacialTraits.substr(2))
+				// update screen (diagnostic section)
+				$('#calcRacialTraits').html(varRacialTraits.substr(2))
+			}
 		}
 
 		// calculate special abilities section
@@ -2810,7 +2900,7 @@ if($pkid == 0) {
 // TO DO:		// spell resistance
 
 							case 'Spell Resistance':
-								charSheet.addValue('race', 'save', 
+								charSheet.addValue('class', 'save', 
 								                   (10 + charSheet.getNumber('class_level.MNK')) 
 								                   + ' ' + varClassFeatureHTML)
 								break
@@ -3434,10 +3524,10 @@ if($pkid == 0) {
 								break
 							case 'Wild Shape':
 								if(charSheet.getNumber('class_level.DRD') == 20) {
-									charSheet.addValue('race', 'sa', varClassFeatureHTML + ' at will')
+									charSheet.addValue('class', 'sa', varClassFeatureHTML + ' at will')
 								}
 								else {
-									charSheet.addValue('race', 'sa', 
+									charSheet.addValue('class', 'sa', 
 									                   varClassFeatureHTML + ' ' 
 									                   + Math.floor((1 * charSheet.getNumber('class_level.DRD') - 2) / 2) + '/day')
 								}
@@ -3734,9 +3824,8 @@ if($pkid == 0) {
 								                   + (temp + charSheet.bonus(charSheet.getTotal('cha'))))
 								break
 							case 'Armour Training':
-								charSheet.addValue('class', 'sq', 
-								                   varClassFeatureHTML + ' +' 
-								                   + Math.floor((1 * charSheet.getNumber('class_level.FTR') + 1) / 4))
+								charSheet.addValue('class', 'armourTraining',
+								                   Math.floor((1 * charSheet.getNumber('class_level.FTR') + 1) / 4))
 								break
 							case 'Slow Fall':
 								charSheet.adjustments.class.slowFallDesc = varClassFeatureHTML
@@ -3925,12 +4014,12 @@ if($pkid == 0) {
 								// add arcane school powers
 								// TO DO: Arcane School effects on stats
 								var tmpWizLvl = charSheet.getNumber('class_level.WIZ')
-								if(varClassFeatureDetail) {
+								if(varClassFeatureDetail && varClassFeatureDetail != 'Universalist') {
 									charSheet.addValue('class', 'schoolNotes', 'School Power (+2 DC to ' + varClassFeatureDetail + ')')
 								}
 								if(varClassFeatureDetail == 'Abjuration') {
 									charSheet.addValue('class', 'schoolNotes', '<span title="You gain resistance 5 to an energy type of your choice, chosen when you prepare spells. This resistance can be changed each day. At 11th level, this resistance increases to 10. At 20th level, this resistance changes to immunity to the chosen energy type.">Resistance</span>')
-									charSheet.addValue('class', 'schoolNotes', '<span title="As a standard action, you can create a 10-foot-radius field of protective magic centered on you that lasts for a number of rounds equal to your Intelligence modifier. All allies in this area (including you) receive a +1 def lection bonus to their AC for 1 round. This bonus increases by +1 for every five wizard levels you possess. You can use this ability a number of times per day equal to 3 + your Intelligence modifier.">Protective Ward</span>')
+									charSheet.addValue('class', 'schoolNotes', '<span title="As a standard action, you can create a 10-foot-radius field of protective magic centered on you that lasts for a number of rounds equal to your Intelligence modifier. All allies in this area (including you) receive a +1 deflection bonus to their AC for 1 round. This bonus increases by +1 for every five wizard levels you possess. You can use this ability a number of times per day equal to 3 + your Intelligence modifier.">Protective Ward</span>')
 									if(tmpWizLvl > 5) {
 										charSheet.addValue('class', 'schoolNotes', '<span title="At 6th level, you gain an amount of energy absorption equal to 3 times your wizard level per day. Whenever you take energy damage, apply immunity, vulnerability (if any), and resistance first and apply the rest to this absorption, reducing your daily total by that amount. Any damage in excess of your absorption is applied to you normally.">Energy Absorption</span>')
 									}
@@ -3943,14 +4032,14 @@ if($pkid == 0) {
 									}
 								}
 								if(varClassFeatureDetail == 'Divination') {
-									charSheet.addValue('class', 'schoolNotes', '<span title="You can always act in the surprise round even if you fail to make a Perception roll to notice a foe, but you are still considered f lat-footed until you take an action. In addition, you receive a bonus on initiative checks equal to 1/2 your wizard level (minimum +1). At 20th level, anytime you roll initiative, assume the roll resulted in a natural 20.">Forewarned</span>')
+									charSheet.addValue('class', 'schoolNotes', '<span title="You can always act in the surprise round even if you fail to make a Perception roll to notice a foe, but you are still considered flat-footed until you take an action. In addition, you receive a bonus on initiative checks equal to 1/2 your wizard level (minimum +1). At 20th level, anytime you roll initiative, assume the roll resulted in a natural 20.">Forewarned</span>')
 									charSheet.addValue('class', 'schoolNotes', '<span title="When you activate this school power, you can touch any creature as a standard action to give it an insight bonus on all of its attack rolls, skill checks, ability checks, and saving throws equal to 1/2 your wizard level (minimum +1) for 1 round. You can use this ability a number of times per day equal to 3 + your Intelligence modifier.">Diviner\'s Fortune</span>')
 									if(tmpWizLvl > 7) {
 										charSheet.addValue('class', 'schoolNotes', '<span title="At 8th level, you are always aware when you are being observed via magic, as if you had a permanent detect scrying. In addition, whenever you scry on a subject, treat the subject as one step more familiar to you. Very familiar subjects get a –10 penalty on their save to avoid your scrying attempts.">Scrying Adept</span>')
 									}
 								}
 								if(varClassFeatureDetail == 'Enchantment') {
-									charSheet.addValue('class', 'schoolNotes', '<span title="You gain a +2 enhancement bonus on Bluff, Diplomacy, and Intimidate skill checks. This bonus increases by +1 for every five wizard levels you possess, up to a maximum of +6 at 20th level. At 20th level, whenever you succeed at a saving throw against a spell of the enchantment school, that spell is ref lected back at its caster, as per spell turning.">Enchanting Smile</span>')
+									charSheet.addValue('class', 'schoolNotes', '<span title="You gain a +2 enhancement bonus on Bluff, Diplomacy, and Intimidate skill checks. This bonus increases by +1 for every five wizard levels you possess, up to a maximum of +6 at 20th level. At 20th level, whenever you succeed at a saving throw against a spell of the enchantment school, that spell is reflected back at its caster, as per spell turning.">Enchanting Smile</span>')
 									charSheet.addValue('class', 'schoolNotes', '<span title="You can cause a living creature to become dazed for 1 round as a melee touch attack. Creatures with more Hit Dice than your wizard level are unaffected. You can use this ability a number of times per day equal to 3 + your Intelligence modifier.">Dazing Touch</span>')
 									if(tmpWizLvl > 7) {
 										charSheet.addValue('class', 'schoolNotes', '<span title="At 8th level, you can emit a 30-foot aura of despair for a number of rounds per day equal to your wizard level. Enemies within this aura take a –2 penalty on ability checks, attack rolls, damage rolls, saving throws, and skill checks. These rounds do not need to be consecutive.">Aura Of Despair</span>')
@@ -3985,7 +4074,7 @@ if($pkid == 0) {
 									}
 								}
 								if(varClassFeatureDetail == 'Universalist') {
-									charSheet.addValue('class', 'schoolNotes', '<span title="You cause your melee weapon to f ly from your grasp and strike a foe before instantly returning to you. As a standard action, you can make a single attack using a melee weapon at a range of 30 feet. This attack is treated as a ranged attack with a thrown weapon, except that you add your Intelligence modifier on the attack roll instead of your Dexterity modifier (damage still relies on Strength). This ability cannot be used to perform a combat maneuver. You can use this ability a number of times per day equal to 3 + your Intelligence modifier.">Hand of the Apprentice</span>')
+									charSheet.addValue('class', 'schoolNotes', '<span title="You cause your melee weapon to fly from your grasp and strike a foe before instantly returning to you. As a standard action, you can make a single attack using a melee weapon at a range of 30 feet. This attack is treated as a ranged attack with a thrown weapon, except that you add your Intelligence modifier on the attack roll instead of your Dexterity modifier (damage still relies on Strength). This ability cannot be used to perform a combat maneuver. You can use this ability a number of times per day equal to 3 + your Intelligence modifier.">Hand of the Apprentice</span>')
 									if(tmpWizLvl > 7) {
 										charSheet.addValue('class', 'schoolNotes', '<span title="At 8th level, you can apply any one metamagic feat that you know to a spell you are about to cast. This does not alter the level of the spell or the casting time. You can use this ability once per day at 8th level and one additional time per day for every two wizard levels you possess beyond 8th. Any time you use this ability to apply a metamagic feat that increases the spell level by more than 1, you must use an additional daily usage for each level above 1 that the feat adds to the spell. Even though this ability does not modify the spell’s actual level, you cannot use this ability to cast a spell whose modified spell level would be above the level of the highest-level spell that you are capable of casting.">Metamagic Mastery</span>')
 									}
@@ -4035,7 +4124,7 @@ if($pkid == 0) {
 						temp += 7
 						// isolate class name from feature name
 						tmpEnd = charSheet.class_features[i].name.indexOf(' ', temp)
-						tmpSpellClass = abbreviate_class_name(charSheet.class_features[i].name.substr(temp, tmpEnd - temp))
+						tmpSpellClass = buildClassAbbrev(charSheet.class_features[i].name.substr(temp, tmpEnd - temp))
 
 						// only set level if spell is obtainable based on ability score
 						tmpSpellLevel = ValidateBonusSpell(i)
@@ -4159,7 +4248,7 @@ if($pkid == 0) {
 							}
 							charSheet.spells.PAL[tmpLevel] = {}
 							charSheet.spells.PAL[tmpLevel].perDay = tmpCount
-							charSheet.spells.PAL.concentration = 10 + charSheet.getNumber('class_level.PAL') 
+							charSheet.spells.PAL.concentration = 7 + charSheet.getNumber('class_level.PAL') 
 							                                   + charSheet.bonus(charSheet.getTotal('cha'))
 							charSheet.spells.PAL.title = 'Paladin Spells Prepared'
 						}
@@ -4169,7 +4258,7 @@ if($pkid == 0) {
 							}
 							charSheet.spells.RGR[tmpLevel] = {}
 							charSheet.spells.RGR[tmpLevel].perDay = tmpCount
-							charSheet.spells.RGR.concentration = 10 + charSheet.getNumber('class_level.RGR') 
+							charSheet.spells.RGR.concentration = 7 + charSheet.getNumber('class_level.RGR') 
 							                                   + charSheet.bonus(charSheet.getTotal('wis'))
 							charSheet.spells.RGR.title = 'Ranger Spells Prepared'
 						}
@@ -4218,9 +4307,10 @@ if($pkid == 0) {
 			if(charSheet.getTotal('domains')) {
 				for(var j = 1; j < 10; j++) {
 					for(var i = 0; i < charSheet.getTotal('domains').length; i++) {
-						charSheet['output' + j + 'DOMAINKnown'] += '<option value=\'' + charSheet.getTotal('domains')[i] + '\'>'
-						                                         + charSheet.spell_list['DOMAIN'][j][charSheet.getTotal('domains')[i]] 
-						                                         + '</option>'
+						charSheet['output' + j + 'DOMAINKnown'] 
+							+= '<option value=\'' + charSheet.getTotal('domains')[i] + '\'>'
+						   + charSheet.spell_list['DOMAIN'][j][charSheet.getTotal('domains')[i]] 
+						   + '</option>'
 					}
 					charSheet['output' + j + 'DOMAINKnown'] += '</select>'
 				}
@@ -4263,16 +4353,8 @@ if($pkid == 0) {
 			return spellLevel
 		}
 
-		// calculate number of arcane spellcasting levels
-		function is_arcane_spellcaster()
-		{
-			return (charSheet.getNumber('class_level.SOR')
-			      + charSheet.getNumber('class_level.WIZ')
-			      + charSheet.getNumber('class_level.BRD'))
-		}
-
 		// accept class full name and return its abbreviation
-		function abbreviate_class_name(paramClassName)
+		function buildClassAbbrev(paramClassName)
 		{
 			switch(paramClassName.toLowerCase()) {
 				case 'adept':       return 'ADP'
@@ -4327,15 +4409,18 @@ if($pkid == 0) {
 			// reset gear adjustments
 			charSheet.adjustments.gear = new CharSheetAdjustments()
 
-			// armour
-			charSheet.addValue('gear', 'acDeflect', charSheet.getNumber('shield.armour_ac'))
-			charSheet.addValue('gear', 'acDeflect', charSheet.getNumber('armour.armour_ac'))
+			// set deflection values for armour
+			// removed - handled in treasure subsection now
+			// charSheet.addValue('gear', 'acDeflect', charSheet.getNumber('shield.armour_ac'))
+			// charSheet.addValue('gear', 'acDeflect', charSheet.getNumber('armour.armour_ac'))
 
 			// calculate value of gear based on cr
 			var tmpMaxValue = 0
 			charSheet.total_value = $('#total_value').val()
 
-			switch(charSheet.getValue('cr')) {
+			switch(charSheet.getTotal('cr')) {
+				case -2: tmpMaxValue = 130
+				         break
 				case -1: tmpMaxValue = 260
 				         break
 				case 0:  tmpMaxValue = 390
@@ -4379,6 +4464,7 @@ if($pkid == 0) {
 				case 19: tmpMaxValue = 159000
 				         break
 			}
+			// add gold bonus to value of gear
 			tmpMaxValue += charSheet.getTotal('gold')
 
 			// load
@@ -4389,11 +4475,21 @@ if($pkid == 0) {
 			if(charSheet.getNumber('total_weight') <= tmpCarryingCap) {
 				tmpLoad = 'light load'
 				charSheet.loadType = 0
+				// if armoured:
+				if(charSheet.getValue('armour')) {
+					// no monk bonuses
+					charSheet.addValue('gear', 'acMonk', -1 * charSheet.getTotal('acMonk'))
+					charSheet.addValue('gear', 'acWisdom', -1 * charSheet.getTotal('acWisdom'))
+				}
 			}
 			// otherwise: medium, heavy or extreme load:
 			else {
 				// calculate load type
 				charSheet.loadType = Math.ceil((charSheet.getNumber('total_weight') - tmpCarryingCap) / (tmpCarryingCap / 4))
+
+				// no monk bonuses
+				charSheet.addValue('gear', 'acMonk', -1 * charSheet.getTotal('acMonk'))
+				charSheet.addValue('gear', 'acWisdom', -1 * charSheet.getTotal('acWisdom'))
 				
 				// calculate load description
 				if(charSheet.getNumber('total_weight') <= tmpCarryingCap * 2) {
@@ -4445,6 +4541,7 @@ if($pkid == 0) {
 				$('#encounterSection').html(loadingWidget)
 
 				// ajax call to populate first section, which cascades to populate all sections on the page
+				buildSection('Clone')
 				buildSection('Abilities')
 			}
 			console.log(' ... CHECK')

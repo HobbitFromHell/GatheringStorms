@@ -27,17 +27,23 @@ if($pkid > 0) {
 				<div id="languagesSection"></div>
 				<div id="specialqualitiesSection" style="display:none"></div>
 
+				<h6 class="statBlockSection">Treasure</h6>
+				<div class="statBlockDetail" id="treasureSection"></div>
+
 			</td>
 			<td class="statBlockSingleWide statBlockSpacer">
 
-				<h6 class="statBlockSection">Treasure</h6>
-				<div class="statBlockDetail" id="treasureSection"></div>
+				<h6 class="statBlockSection">Organization</h6>
+				<div id="organizationSection"></div>
 
 				<h6 class="statBlockSection">Description</h6>
 				<div id="descriptionSection"></div>
 
 				<h6 class="statBlockSection" style="display:none">Special Abilities</h6>
 				<div class="statBlockDetail" id="specialabilitiesSection" style="display:none"></div>
+
+				<h6 class="statBlockSection">Biography</h6>
+				<div id="historySection"></div>
 
 			</td>
 		</tr>
@@ -49,15 +55,14 @@ if($pkid > 0) {
 				<h6 class="statBlockSection">Encounters</h6>
 				<div id="encounterSection"></div>
 
-				<h6 class="statBlockSection">Organization</h6>
-				<div id="organizationSection"></div>
-
-				<h6 class="statBlockSection">Stat Block (temporary)</h6>
-				<div id="statblockSection" style="display:block"></div>
+				<h6 class="statBlockSection" style="display:none">Stat Block (temporary)</h6>
+				<div id="statblockSection" style="display:none"></div>
 
 			</td>
 		</tr>
 	</table>
+
+	<div class="statBlockSpacer" id="cloneSection"></div>
 <?php
 
 }
@@ -113,6 +118,6 @@ else {
 <?php
 }
 
-include "../view/footer.php";
+include "../inc/footer.php";
 
 ?>

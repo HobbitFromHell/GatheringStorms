@@ -65,46 +65,45 @@ $j = DataConnector::selectQuery("
 	  ORDER BY g.`name`
 ");
 while($j) {
-//	if($j['id'] == $view->characterDescription['description']['god_id']) {
-//		$view->god = $j['name'];
-//	}
 	$view->characterDescription['description']['god']['list'][] = $j;
 	$j = DataConnector::selectQuery();
 }
 
-// strip X and Y numeric location values from location_id, form: "[-]#0x[-]#0"
-$varXLoc = stripos($view->characterDescription['description']['location'], "x");
-$varXCo = substr($view->characterDescription['description']['location'], 0, $varXLoc);
-$varYCo = substr($view->characterDescription['description']['location'], $varXLoc + 1);
-$varCoordinates = "";
-$varHexSize = 3;
-
-// build location list, based on distance from current coordinates
-for($varTmpX = $varHexSize * -1; $varTmpX <= $varHexSize; $varTmpX++) {
-	for($varTmpY = $varHexSize * -1; $varTmpY <= $varHexSize; $varTmpY++) {
-		$varCoordinates .= "'" . ($varTmpX + $varXCo) . "x" . ($varTmpY + $varYCo) . "',";
+if($view->characterDescription['description']['location']) {
+	// strip X and Y numeric location values from location_id, form: "[-]#0x[-]#0"
+	$varXLoc = stripos($view->characterDescription['description']['location'], "x");
+	$varXCo = substr($view->characterDescription['description']['location'], 0, $varXLoc);
+	$varYCo = substr($view->characterDescription['description']['location'], $varXLoc + 1);
+	$varCoordinates = "";
+	$varHexSize = 3;
+	
+	// build location list, based on distance from current coordinates
+	for($varTmpX = $varHexSize * -1; $varTmpX <= $varHexSize; $varTmpX++) {
+		for($varTmpY = $varHexSize * -1; $varTmpY <= $varHexSize; $varTmpY++) {
+			$varCoordinates .= "'" . ($varTmpX + $varXCo) . "x" . ($varTmpY + $varYCo) . "',";
+		}
 	}
-}
-$varCoordinates = substr($varCoordinates, 0, -1); // string trailing comma
-
-$j = DataConnector::selectQuery("
-	 SELECT l.`id`      AS `location`,
-	        l.`name`    AS `name`,
-	        l.`image`   AS `image`,
-	        l.`terrain` AS `terrain`,
-	        l.`growth`  AS `growth`,
-	        l.`roads`   AS `roads`,
-	        l.`trails`  AS `trails`,
-	        l.`rivers`  AS `rivers`
-	   FROM t_locations l
-	  WHERE l.`id` IN ({$varCoordinates})
-");
-while ($j) {
-	$varTmpXloc = stripos($j['location'], "x");
-	$varTmpXco = substr($j['location'], 0, $varTmpXloc);
-	$varTmpYco = substr($j['location'], $varTmpXloc + 1);
-	$view->characterDescription['location'][$varTmpXco][$varTmpYco] = $j;
-	$j = DataConnector::selectQuery();
+	$varCoordinates = substr($varCoordinates, 0, -1); // string trailing comma
+	
+	$j = DataConnector::selectQuery("
+		 SELECT l.`id`      AS `location`,
+		        l.`name`    AS `name`,
+		        l.`image`   AS `image`,
+		        l.`terrain` AS `terrain`,
+		        l.`growth`  AS `growth`,
+		        l.`roads`   AS `roads`,
+		        l.`trails`  AS `trails`,
+		        l.`rivers`  AS `rivers`
+		   FROM t_locations l
+		  WHERE l.`id` IN ({$varCoordinates})
+	");
+	while ($j) {
+		$varTmpXloc = stripos($j['location'], "x");
+		$varTmpXco = substr($j['location'], 0, $varTmpXloc);
+		$varTmpYco = substr($j['location'], $varTmpXloc + 1);
+		$view->characterDescription['location'][$varTmpXco][$varTmpYco] = $j;
+		$j = DataConnector::selectQuery();
+	}
 }
 
 
@@ -115,6 +114,7 @@ while ($j) {
 if (!isset($_POST['id'])) { // only during initial rendering should the next subsection be called
 	echo "<script>\n";
 	echo "buildSection('Organization')\n";
+	echo "buildSection('History')\n";
 	echo "</script>\n";
 }
 

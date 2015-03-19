@@ -141,7 +141,7 @@ class BuildOutput
 
 				// if textarea: render it
 				if($paramFieldSize == "textbox" or $paramFieldSize == "textarea") {
-					$this->addEdit("<textarea id=\"{$paramColumnName}\" rows=\"5\" style=\"width:100%\">{$paramField}</textarea>", $paramKeyEdit);
+					$this->addEdit("<textarea id=\"{$paramColumnName}\" rows=\"10\" style=\"width:100%\">{$paramField}</textarea>", $paramKeyEdit);
 				}
 				// otherwise: render a text input
 				else {
@@ -565,6 +565,9 @@ function buildCharList($paramCharList) // array of objects with id, name, option
 {
 	$varOutput = "";
 	for($i = 0; $i < count($paramCharList); $i++) {
+		if(!isset($paramCharList[$i]['id'])) {
+			return "None.<br>";
+		}
 		// name
 		$varOutput .= "<a href=\"/character/?id={$paramCharList[$i]['id']}\">{$paramCharList[$i]['name']}</a> (";
 		// alignment
@@ -590,6 +593,46 @@ function buildCharList($paramCharList) // array of objects with id, name, option
 }
 
 /**
+ * Produces a HTML-formatted list of historic events
+ *
+ * Each member of the list is changed into a HTML-formatted 
+ * list giving "name" (also a link to the detail page which 
+ * requires "org_id") followed optionally by "location" or
+ * "location_id".
+ * @param object (list of locations data pulled from DB)
+ * @return string
+ */
+function buildHistoryList($paramEventList) // array of objects with 
+{
+	$varOutput = "";
+	for($i = 0; $i < count($paramEventList); ++ $i) {
+		if($paramEventList[$i]['id']) {
+			$varOutput .= "<a href=\"/history/?id={$paramEventList[$i]['id']}\">";
+		}
+		if($paramEventList[$i]['is_circa'] == 'Yes') {
+			$varOutput .= "c.";
+		}
+		$varOutput .= "{$paramEventList[$i]['start_year']}";
+		if($paramEventList[$i]['end_year']) {
+			$varOutput .= "-{$paramEventList[$i]['end_year']}";
+		}
+		$varOutput .= " DR";
+		if($paramEventList[$i]['month']) {
+			$varOutput .= ", {$paramEventList[$i]['month']}";
+			if($paramEventList[$i]['day']) {
+				$tmp = ordinal_format($paramEventList[$i]['day']);
+				$varOutput .= " {$tmp}";
+			}
+		}
+		if($paramEventList[$i]['id']) {
+			$varOutput .= "</a>";
+		}
+		$varOutput .= ": {$paramEventList[$i]['name']}<br>";
+	}
+	return $varOutput;
+}
+
+/**
  * Produces a HTML-formatted list of organizations
  *
  * Each member of the list is changed into a HTML-formatted 
@@ -603,15 +646,30 @@ function buildOrgList($paramOrgList) // array of objects with org_id, name, opti
 {
 	$varOutput = "";
 	for($i = 0; $i < count($paramOrgList); ++ $i) {
+		// allow for abbreviated 'org_id'
+		if($paramOrgList[$i]['organization_id']) {
+			$paramOrgList[$i]['org_id'] = $paramOrgList[$i]['organization_id'];
+		}
+
 		// name
 		$varOutput .= "<a href=\"/organization/?id={$paramOrgList[$i]['org_id']}\">{$paramOrgList[$i]['name']}</a>";
+
+		//optional
+		$tmpOutput = "";
+		// title
+		if($paramOrgList[$i]['title']) {
+			$tmpOutput .= $paramOrgList[$i]['title'] . ", ";
+		}
 		// location name
 		if($paramOrgList[$i]['location']) {
-			$varOutput .= " (" . $paramOrgList[$i]['location'] . ")";
+			$tmpOutput .= $paramOrgList[$i]['location'] . ", ";
 		}
 		// location id
 		else if($paramLocList[$i]['location_id']) {
-			$varOutput .= " (" . $paramOrgList[$i]['location_id'] . ")";
+			$tmpOutput .= $paramOrgList[$i]['location_id'] . ", ";
+		}
+		if($tmpOutput) {
+			$varOutput .= " (" . substr($tmpOutput, 0, -2) . ")";
 		}
 		$varOutput .= "<br>";
 	}

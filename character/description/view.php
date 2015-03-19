@@ -25,6 +25,8 @@ $output->br();
 
 echo $output->dump(1);
 
-echo drawHexMap($varXCo, $varYCo, $varHexSize, $view->characterDescription['location']);
+if($view->characterDescription['description']['location']) {
+	echo drawHexMap($varXCo, $varYCo, $varHexSize, $view->characterDescription['location']);
+}
 
 ?>

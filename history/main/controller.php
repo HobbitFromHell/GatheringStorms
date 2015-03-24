@@ -13,7 +13,7 @@ if (!($pkid > 0 and $pkid < 65000)) {
 // insert
 // //////
 
-post_data("t_history", "id", "id", Array("source", "name", "start_year", "end_year", "month", "day", "location_id", "region_id", "description", "is_deleted"));
+post_data("t_history", "id", "id", Array("source", "name", "start_year", "end_year", "month", "day", "location_id", "region_id", "region2_id", "description", "is_deleted"));
 
 
 // //////
@@ -33,6 +33,7 @@ $view->historyMain = DataConnector::selectQuery("
 	        h.`location_id` AS `location_id`,
 	        l.`name`        AS `location`,
 	        h.`region_id`   AS `region_id`,
+	        h.`region2_id`  AS `region2_id`,
 	        h.`description` AS `description`,
 	        h.`is_deleted`  AS `is_deleted`
 	   FROM   `t_history` h
@@ -53,6 +54,8 @@ $tmp['id'] = 0;
 $tmp['name'] = "";
 $view->historyMain['region']['list'][] = $tmp;
 $view->historyMain['region']['name'] = "";
+$view->historyMain['region2']['list'][] = $tmp;
+$view->historyMain['region2']['name'] = "";
 
 $j = DataConnector::selectQuery("
 	 SELECT r.`id`          AS `id`,
@@ -64,7 +67,11 @@ while($j) {
 	if($j['id'] == $view->historyMain['region_id']) {
 		$view->historyMain['region']['name'] = $j['name'];
 	}
+	if($j['id'] == $view->historyMain['region2_id']) {
+		$view->historyMain['region2']['name'] = $j['name'];
+	}
 	$view->historyMain['region']['list'][] = $j;
+	$view->historyMain['region2']['list'][] = $j;
 	$j = DataConnector::selectQuery();
 }
 

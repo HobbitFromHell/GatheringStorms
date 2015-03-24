@@ -19,6 +19,12 @@ if(isset($pkid)) {
 				<h6 class="statBlockSection">Inhabitants</h6>
 				<div id="inhabitantSection"></div>
 
+				<h6 class="statBlockSection">Organizations</h6>
+				<div id="organizationSection"></div>
+
+				<h6 class="statBlockSection">History</h6>
+				<div id="historySection"></div>
+
 			</td>
 		</tr>
 	</table>
@@ -26,15 +32,14 @@ if(isset($pkid)) {
 		<tr>
 			<td class="statBlockDoubleWide statBlockSpacer">
 
-				<h6 class="statBlockSection">Encounters</h6>
-				<div id="encounterSection"></div>
-
-				<h6 class="statBlockSection">Maps</h6>
+				<h6 class="statBlockSection">Regional Map</h6>
 				<div id="mapSection"></div>
+
+				<h6 class="statBlockSection">Local Maps</h6>
 				<div id="localmapSection"></div>
 
-				<h6 class="statBlockSection">Organizations</h6>
-				<div id="organizationSection"></div>
+				<h6 class="statBlockSection">Encounters</h6>
+				<div id="encounterSection"></div>
 
 			</td>
 		</tr>
@@ -46,6 +51,35 @@ else {
 
 	// no location id: present list page
 
+/* BIG MAP
+	$varMinX = $varMinY = -50;
+	$varMaxX = $varMaxY = 50;
+
+	echo("<table class=\"orgTable\" style=\"margin-left:40px\">");
+	for($varY = $varMinY; $varY < $varMaxY + 1; ++ $varY) {
+		echo("<tr>");
+		for($varX = $varMinX; $varX < $varMaxX + 1; ++ $varX) {
+			echo("<td class=\"orgTD\" style=\"background-color:");
+			if($varBigMap[$varX][$varY]['important']) {
+				echo("red;");
+			}
+			else {
+				if(isset($varBigMap[$varX][$varY])) {
+					$tmpColour = terrainColour($varBigMap[$varX][$varY]['terrain'], $varBigMap[$varX][$varY]['growth']);
+					echo("#{$tmpColour};");
+				}
+				else {
+					echo("#999;");
+				}
+			}
+			echo("\"><a href=\"/location/?id={$varX}x{$varY}\">");
+			echo("<img src=\"/img/map-road0.gif\" width=\"8\" height=\"8\">");
+			echo("</a></td>");
+		}
+		echo("</tr>");
+	}
+	echo("</table>");
+*/
 ?>
 	<br>
 	<br>
@@ -96,9 +130,9 @@ else {
 	echo("<table width=\"100%\"><tr>\n");
 	echo("{$varPrevNext}\n</tr>\n<tr>\n");
 	while($varRecord) {
-		echo("<td class=\"listTD\"><a href=\"/location/?id={$varRecord[id]}\"><b>{$varRecord[name]}</b></a></td>\n");
-		echo("<td class=\"listTD\">CR&nbsp;" . cr_display($varRecord[cr]) . "</td>\n");
-		echo("<td class=\"listTD\">{$varRecord[region]} {$varRecord[alignment]}</td>\n");
+		echo("<td class=\"listTD\"><a href=\"/location/?id={$varRecord['id']}\"><b>{$varRecord['name']}</b></a></td>\n");
+		echo("<td class=\"listTD\">CR&nbsp;" . cr_display($varRecord['cr']) . "</td>\n");
+		echo("<td class=\"listTD\">{$varRecord['region']} {$varRecord['alignment']}</td>\n");
 		if(++$varCounter % 3 == 0) {
 			echo("</tr><tr>\n");
 		}
@@ -111,6 +145,6 @@ else {
 	echo("</table>\n");
 */
 }
-include "/view/footer.php";
+include "../inc/footer.php";
 
 ?>

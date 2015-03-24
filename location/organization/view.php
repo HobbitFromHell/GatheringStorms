@@ -11,6 +11,6 @@ $output->add("organization", $view->locationOrganization['organization'], 0, "",
 
 $output->addRead(buildOrgList($view->locationOrganization['organization']));
 
-echo $output->dump(1);
+echo $output->dump(0);
 
 ?>

@@ -2,22 +2,21 @@
 
 // create data collection to share information with the view
 $view = new DataCollector;
+$pageName = "Locations";
 
 if($pkid == 0) {
 
 	// no location id: present list page
 
+	$getLocKeyword = $getRegionKeyword = "";
+	$getOffset = 0;
+	$getLimit = 60;
+
 	if(isset($_GET['page_start'])) {
 		$getOffset = sanitize($_GET['page_start']);
 	}
-	else {
-		$getOffset = 0;
-	}
 	if(isset($_GET['page_count'])) {
 		$getLimit = sanitize($_GET['page_count']);
-	}
-	else {
-		$getLimit = 60;
 	}
 	if(isset($_GET['region'])) {
 		$getRegionKeyword = sanitize($_GET['region']);
@@ -59,6 +58,35 @@ if($pkid == 0) {
 	if($varCounter == $getLimit) {
 		$view->locationListMore = 1;
 	}
+
+/* big map
+	$varMinX = $varMaxX = $varMinY = $varMaxY = 0;
+
+	$varRecord = DataConnector::selectQuery("
+		 SELECT l.`id`      AS `id`,
+		        IF(l.`image` IS NULL, 1, IF(l.`image` = '', 0, 1)) AS `important`,
+		        l.`terrain` AS `terrain`,
+		        l.`growth`  AS `growth`
+		   FROM t_locations l
+	");
+
+	while($varRecord) {
+		if(stripos($varRecord['id'], "x") !== FALSE) {
+			$varCoords = split("x", $varRecord['id']);
+
+			$varBigMap[$varCoords[0]][$varCoords[1]]['important'] = $varRecord['important'];
+			$varBigMap[$varCoords[0]][$varCoords[1]]['terrain'] = $varRecord['terrain'];
+			$varBigMap[$varCoords[0]][$varCoords[1]]['growth'] = $varRecord['growth'];
+
+			if($varCoords[0] < $varMinX) $varMinX = $varCoords[0];
+			if($varCoords[0] > $varMaxX) $varMaxX = $varCoords[0];
+			if($varCoords[1] < $varMinX) $varMinY = $varCoords[1];
+			if($varCoords[1] > $varMaxX) $varMaxY = $varCoords[1];
+		}
+	
+		$varRecord = DataConnector::selectQuery();
+	}
+*/
 }
 ?>
 	<script>
@@ -77,6 +105,7 @@ if($pkid == 0) {
 	
 				// ajax call to populate first section, which cascades to populate all sections on the page
 				buildSection('Main')
+				buildSection('History')
 			}
 
 			console.log(" ... CHECK")

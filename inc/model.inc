@@ -1,6 +1,13 @@
 <?php
 
-include "databaseCredentials.inc";
+require "databaseCredentials.inc";
+
+/**
+ * Set primary key id from get data
+ */
+if (isset($_GET['id'])) {
+	$pkid = sanitize($_GET['id']);
+}
 
 // exception handler
 function redirect_on_error($e) {
@@ -10,6 +17,9 @@ function redirect_on_error($e) {
 	}
 	else if(is_a($e, "DataException")) {
 		header("Location: /data/php");
+	}
+	else if(is_a($e, "MandatoryException")) {
+		header("Location: /mandatory/php");
 	}
 	else {
 		include("error.html");
@@ -21,7 +31,6 @@ set_exception_handler("redirect_on_error");
 
 /**
  * Hobbit From Hell common model functions
- *
  *
  * Controls communication with DB server
  * @package Database
@@ -49,6 +58,12 @@ class DataConnector extends Mysqli
 	private static $res;
 
 	/*
+	 *
+	 */
+	private static $writeHandle;
+	private static $readHandle;
+
+	/*
 	 * Constructor
 	 *
 	 * Pass hardcoded DB connection details to parent
@@ -56,7 +71,7 @@ class DataConnector extends Mysqli
 	 */
 	private function __construct()
 	{
-		switch($_SERVER['HTTP_HOST']) {
+		switch(@$_SERVER['HTTP_HOST']) {
 			case "hfh.myronwyles.com":
 				$connectorCred = new StagDBCredentials;
 				break;
@@ -67,7 +82,7 @@ class DataConnector extends Mysqli
 				$connectorCred = new DevDBCredentials;
 		}
 
-		parent::__construct($connectorCred->name,
+		parent::__construct($connectorCred->host,
 		                    $connectorCred->user,
 		                    $connectorCred->pass,
 		                    $connectorCred->schema
@@ -84,6 +99,8 @@ class DataConnector extends Mysqli
 	 */
 	public static function selectQuery($paramQuery = NULL, $paramReturnRecord = TRUE)
 	{
+		@$pkid = $GLOBALS['pkid'];
+
 		// if singleton not yet instantiated:
 		if(self::$instance === FALSE) {
 			try {
@@ -94,14 +111,79 @@ class DataConnector extends Mysqli
 			}
 		}
 
-		// if query parameter was passed: set query
+		// if query parameter was passed:
 		if($paramQuery) {
+			// close any connections to cache files
+			if(self::$writeHandle) {
+				fclose(self::$writeHandle);
+			}
+			if(self::$readHandle) {
+				fclose(self::$readHandle);
+			}
+
+			// strip extra spaces, tabs and line breaks
+			$varCleanQuery = preg_replace('/\s+/i', ' ', $paramQuery);
+			// strip semi-colons (security - only one statement at a time)
+			$varCleanQuery = preg_replace('/;/i', '', $varCleanQuery);
+			// trim leading and trailing spaces
+			$varCleanQuery = preg_replace('/^ /i', '', $varCleanQuery);
+			$varCleanQuery = preg_replace('/ $/i', ';', $varCleanQuery);
+			// calculate md5 hash of cleaned query
+			$md5Hash = md5($varCleanQuery);
+
+			// if cache exists:
+			if(file_exists("cache\\{$md5Hash}.{$pkid}.cache")) {
+
+				// if open cache for reading:
+				if(self::$readHandle = @fopen("cache\\{$md5Hash}.{$pkid}.cache", "r")) {
+					// read first line (minus the line return)
+					$cacheQuery = substr(fgets(self::$readHandle), 0, -1);
+
+					// if cached query is not the same as the current request:
+					if($cacheQuery != $varCleanQuery) {
+						// forget about reading the cache
+						fclose(self::$readHandle);
+					}
+				}
+			}
+
+			// if return data requested (i.e. select query), and if not reading from cache:
+			if($paramReturnRecord and !self::$readHandle) {
+				// open cache file for writing (name is md5 hash)
+				self::$writeHandle = @fopen("cache\\{$md5Hash}.{$pkid}.cache", "w");
+				if(self::$writeHandle) {
+					fwrite(self::$writeHandle, $varCleanQuery . "\n");
+				}
+			}
+
+			// set query
 			self::$res = self::$instance->query($paramQuery);
 		}
 
-		// if return data requested (i.e. select statement result):
+		// if return data requested (i.e. select query):
 		if($paramReturnRecord) {
-			return self::$res->fetch_assoc();
+
+			// if reading from the cache:
+			if(self::$readHandle) {
+				// fetch record from cache
+				$ret = fgets(self::$readHandle);
+
+				// json decode, and convert to array
+				$ret = json_decode($ret);
+				$ret = get_object_vars($ret);
+			}
+			else {
+				// fetch record from db
+				$ret = self::$res->fetch_assoc();
+
+				// if caching:
+				if($ret and self::$writeHandle) {
+					// write to cache
+					fwrite(self::$writeHandle, json_encode($ret) . "\n");
+				}
+			}
+
+			return $ret;
 		}
 		// otherwise: return insert id
 		else {
@@ -110,14 +192,24 @@ class DataConnector extends Mysqli
 	}
 
 	/*
-	 * sets up INSERT request for selectQuery()
+	 * sets up insert on dup update request
 	 *
 	 * @param string
 	 * @return same as selectQuery()
 	 */
 	public static function updateQuery($paramQuery = NULL)
 	{
+		$pkid = $GLOBALS['pkid'];
+
 		if($paramQuery) {
+			// delete any cache files in this subsection for this id
+			foreach (scandir('cache') as $file) {
+				if (preg_match("/^\w{32}\.{$pkid}\.cache$/i", $file)) {
+					unlink("cache\\{$file}");
+				}
+			}
+
+			// pass to selectQuery() function
 			return self::selectQuery($paramQuery, FALSE);
 		}
 	}
@@ -232,9 +324,11 @@ function post_data($paramTable, $paramKey, $paramID, $paramDataArray)
 					// DEBUG
 					// echo(count($postArray[$postAddNewID]) . "/" . count($paramDataArray) . "<br>");
 					if(count($postArray[$postAddNewID]) == count($paramDataArray)) {
-						// the expected number of params are collected
-						if($postAddNewID > 0 or $postAddNewID == 'X' or ($postAddNewID < 0 and
-						   isset($postArray[$postAddNewID][$paramDataArray[0][0]]))) {
+
+						// if the expected number of params are collected:
+						if($postAddNewID > 0 or $postAddNewID == 'X'
+						   or ($postAddNewID < 0 and 
+						       isset($postArray[$postAddNewID][$paramDataArray[0][0]]))) {
 							// update existing record or add new record
 							// written as one INSERT ON DUP UPDATE statement
 							// start with primay key name

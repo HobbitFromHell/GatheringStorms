@@ -39,15 +39,20 @@ else {
 $output->br();
 
 // region
-$output->add("region_id", $view->historyMain['region'], "Region", "Region", "150");
+$output->add("region_id", $view->historyMain['region'], "Region", "Region", "140");
+// region2
+if($view->historyMain['region_id'] and $view->historyMain['region2_id']) {
+	$output->addRead("/ ");
+}
+$output->add("region2_id", $view->historyMain['region2'], "", "and", "140");
+// location
 if($view->historyMain['region'] && $view->historyMain['location']) {
 	$output->addRead(", {$view->historyMain['location']}");
 }
-// location
 if($view->historyMain['location_id']) $output->addRead(" (");
 $output->add("location_id", $view->historyMain['location_id'], "", "Coordinates", "75");
 if($view->historyMain['location_id']) $output->addRead(")");
-$output->br();
+$output->addRead("<br>");
 
 // source
 $output->add("source", $view->historyMain['source'], "Source", "Source", "100");
